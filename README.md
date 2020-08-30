@@ -8,71 +8,71 @@ El objetivo de esta asignatura es conocer en líneas generales la teoría de la 
 
 ## 2. Índice
 
-### 1. Gráficos estáticos con ggplot: nivel básico
+### Tema 1. Gráficos estáticos con ggplot: nivel básico
 
 * Introducción a la visualización
 * Mapeos y geometrías
 * Gráficos de puntos
 * Gráficos de líneas
 
-### 2. Gráficos estáticos con ggplot: nivel intermedio
+### Tema 2. Gráficos estáticos con ggplot: nivel intermedio
 
 * Escalas
 * Transformaciones estadísticas
 * Gráficos de barras
 * Zoom
 
-### 3. Gráficos estáticos con ggplot: nivel avanzado
+### Tema 3. Gráficos estáticos con ggplot: nivel avanzado
 
 * Títulos, etiquetas y textos
 * Temas
 * Mapas
 * Guardar los gráficos
 
-### 4. Mapas interactivos con leaflet
+### Tema 4. Mapas interactivos con leaflet
 
 * Mapas base y controles del mapa
 * Marcadores
 * Coropletas
 
-### 5. Gráficos interactivos con plotly: nivel básico
+### Tema 5. Gráficos interactivos con plotly: nivel básico
 
 * Gráficos estáticos vs interactivos
 * Primeros gráficos interactivos
 * Controles y personalización
 * Gráficos de puntos, líneas y barras
 
-### 6. Gráficos interactivos con plotly: nivel avanzado
+### Tema 6. Gráficos interactivos con plotly: nivel avanzado
 
 * Controles
 * Animaciones
 
-### 7. Diseño de informes estáticos con rmarkdown
+### Tema 7. Diseño de informes estáticos con rmarkdown
 
 * Markdown
 * Bloques de código
 * Renderizado
 * Parámetros
 
-### 8. Diseño de informes web con flexdashboard
+### Tema 8. Diseño de informes web con flexdashboard
 
 * Layouts
 * Componentes
 * Personalización avanzada
 
-### 9. Diseño de cuadros de mando con shiny: nivel básico
+### Tema 9. Diseño de cuadros de mando con shiny: nivel básico
 
 * Arquitectura
 * Aplicación básica y conceptos
 * Interfaz de usuario
 
-### 10. Diseño de cuadros de mando con shiny: nivel avanzado
+### Tema 10. Diseño de cuadros de mando con shiny: nivel avanzado
 
 * Controles de usuario
 * Salida reactiva
 * Una aplicación completa
 
-### 11. Proyecto
+### Tema 11. Proyecto
 
 ## 3. Material audiovisual y complementario
 
