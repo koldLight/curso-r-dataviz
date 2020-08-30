@@ -10,10 +10,10 @@ El objetivo de esta asignatura es conocer en líneas generales la teoría de la 
 
 1. Gráficos estáticos con ggplot: nivel básico
 
-    1.1.	Introducción a la visualización
-    1.2.	Mapeos y geometrías
-    1.3.	Gráficos de puntos
-    1.4.	Gráficos de líneas
+    1.1. Introducción a la visualización
+    1.2. Mapeos y geometrías
+    1.3. Gráficos de puntos
+    1.4. Gráficos de líneas
 
 2. Gráficos estáticos con ggplot: nivel intermedio
 
@@ -26,7 +26,7 @@ El objetivo de esta asignatura es conocer en líneas generales la teoría de la 
 
     3.1. Títulos, etiquetas y textos
     3.2. Temas
-    3.3. Mapas.
+    3.3. Mapas
     3.4. Guardar los gráficos
 
 4. Mapas interactivos con leaflet
