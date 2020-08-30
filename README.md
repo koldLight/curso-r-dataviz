@@ -8,71 +8,71 @@ El objetivo de esta asignatura es conocer en líneas generales la teoría de la 
 
 ## 2. Índice
 
-1. Gráficos estáticos con ggplot: nivel básico
+### 1. Gráficos estáticos con ggplot: nivel básico
 
-    1.1. Introducción a la visualización
-    1.2. Mapeos y geometrías
-    1.3. Gráficos de puntos
-    1.4. Gráficos de líneas
+* Introducción a la visualización
+* Mapeos y geometrías
+* Gráficos de puntos
+* Gráficos de líneas
 
-2. Gráficos estáticos con ggplot: nivel intermedio
+### 2. Gráficos estáticos con ggplot: nivel intermedio
 
-    2.1. Escalas
-    2.2. Transformaciones estadísticas
-    2.3. Gráficos de barras
-    2.4. Zoom
+* Escalas
+* Transformaciones estadísticas
+* Gráficos de barras
+* Zoom
 
-3. Gráficos estáticos con ggplot: nivel avanzado
+### 3. Gráficos estáticos con ggplot: nivel avanzado
 
-    3.1. Títulos, etiquetas y textos
-    3.2. Temas
-    3.3. Mapas
-    3.4. Guardar los gráficos
+* Títulos, etiquetas y textos
+* Temas
+* Mapas
+* Guardar los gráficos
 
-4. Mapas interactivos con leaflet
+### 4. Mapas interactivos con leaflet
 
-    4.1. Mapas base y controles del mapa
-    4.2. Marcadores
-    4.3. Coropletas
+* Mapas base y controles del mapa
+* Marcadores
+* Coropletas
 
-5. Gráficos interactivos con plotly: nivel básico
+### 5. Gráficos interactivos con plotly: nivel básico
 
-    5.1. Gráficos estáticos vs interactivos
-    5.2. Primeros gráficos interactivos
-    5.3. Controles y personalización
-    5.4. Gráficos de puntos, líneas y barras
+* Gráficos estáticos vs interactivos
+* Primeros gráficos interactivos
+* Controles y personalización
+* Gráficos de puntos, líneas y barras
 
-6. Gráficos interactivos con plotly: nivel avanzado
+### 6. Gráficos interactivos con plotly: nivel avanzado
 
-    6.1. Controles
-    6.2. Animaciones
+* Controles
+* Animaciones
 
-7. Diseño de informes estáticos con rmarkdown
+### 7. Diseño de informes estáticos con rmarkdown
 
-    7.1. Markdown
-    7.2. Bloques de código
-    7.3. Renderizado
-    7.4. Parámetros
+* Markdown
+* Bloques de código
+* Renderizado
+* Parámetros
 
-8. Diseño de informes web con flexdashboard
+### 8. Diseño de informes web con flexdashboard
 
-    8.1. Layouts
-    8.2. Componentes
-    8.3. Personalización avanzada
+* Layouts
+* Componentes
+* Personalización avanzada
 
-9. Diseño de cuadros de mando con shiny: nivel básico
+### 9. Diseño de cuadros de mando con shiny: nivel básico
 
-    9.1. Arquitectura
-    9.2. Aplicación básica y conceptos
-    9.3. Interfaz de usuario
+* Arquitectura
+* Aplicación básica y conceptos
+* Interfaz de usuario
 
-10. Diseño de cuadros de mando con shiny: nivel avanzado
+### 10. Diseño de cuadros de mando con shiny: nivel avanzado
 
-    10.1. Controles de usuario
-    10.2. Salida reactiva
-    10.3. Una aplicación completa
+* Controles de usuario
+* Salida reactiva
+* Una aplicación completa
 
-11. Proyecto
+### 11. Proyecto
 
 ## 3. Material audiovisual y complementario
 
