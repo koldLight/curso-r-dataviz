@@ -1,0 +1,654 @@
+---
+title: "4 - Mapas interactivos con leaflet"
+author: "Luz Frias"
+output:
+  html_document:
+    highlight: tango
+    theme: flatly
+  pdf_document: default
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+## ¿Qué vamos a hacer?
+
+Durante el fastbook anterior vimos una introducción a los gráficos de mapas con ggplot2. En este, profundizaremos en la visualización de datos geoespaciales, y utilizaremos una herramienta especializada en ello: `leaflet`.
+
+`leaflet` es una librería de visualización de mapas creada originalmente para _javascript_, pero existe una librería en _R_ para poder crear mapas directamente desde este lenguaje.
+
+Los objetivos de esta sesión son:
+
+* Entender los conceptos básicos de los datos geoespaciales.
+* Interactuar con mapas con _tiles_ (imágenes de fondo) y geometrías (puntos, polígonos, ...).
+* Representar gráficamente datos geoespaciales.
+
+### ¿Gráficos estáticos o interactivos?
+
+Además, `leaflet` es la primera herramienta de varias que veremos en esta asignatura que crea gráficos interactivos. Por el contrario, `ggplot` crea gráficos estáticos. Los pros, contras, y algunos ejemplos de herramientas de ambos casos son:
+
+* Gráficos estáticos:
+
+    * Pros:
+    
+        * Más sencillo de utilizar
+        * Más exportable: al producir imágenes, se pueden incrustar en cualquier tipo de documento, como PDF, Word, HTML, ...
+        * Auto-contenidos, no necesitan dependencias externas para ser visualizados.
+        
+    * Contras:
+    
+        * Menos ricos, no hay interacción
+    
+    * Ejemplos de herramientas
+    
+        * ggplot, rmarkdown (exportando a PDF, Word, ...).
+        
+* Gráficos interactivos:
+
+    * Pros:
+    
+        * La interactividad permite ampliar información a demanda en un solo gráfico (suelen permitir hacer zoom, sacar _tooltips_ que muestran más datos, etc.).
+        
+    * Contras:
+    
+        * Solo son exportables a HTML.
+        * Suelen necesitar dependencias externas para visualizarse: ciertas librerías de javascript externas, recursos CSS. En general, deben visualizarse dentro de un navegador web.
+    
+    * Ejemplos de herramientas
+    
+        * rmarkdown (exportando a HTML), leaflet, plotly, flexdashboard, shiny.
+
+La elección de crear gráficos estáticos o interactivos depende del caso de uso ante el que nos encontremos. Si estamos haciendo un análisis exploratorio de un dataset, casi siempre nos valdrá con gráficos estáticos. También para realizar informes que deben compartirse por PDF. En cambio, si estamos diseñando un cuadro de mando completo, en un entorno donde los usuarios están acostumbrados a utilizar un explorador web, utilizaremos gráficos interactivos.
+
+## 1. Introducción a los datos geoespaciales
+
+### Sistemas de referencia espaciales
+
+Los sistemas de referencia espaciales sirven para establecer una referencia a la hora de definir la localización de objetos y la relación entre estos.
+
+Existen dos categorías de SREs:
+
+* Geográficos: usan coordenadas esféricas
+* Proyectados: usan coordenadas en un plano
+
+![proyeccion](resources/projection.gif)
+
+A la hora de almacenar información geográfica en la base de datos, debemos especificar las coordenadas y el sistema de referencia. En general, utilizaremos uno de los más comunes: [WGS-84 (EPSG:4326)](http://spatialreference.org/ref/epsg/wgs-84/). Sobre este sistema:
+
+* Es geográfico (no proyectado)
+* Usa longitud, latitud
+
+### Objetos espaciales
+
+Vamos a trabajar con los siguientes tipos de objetos:
+
+* Puntos
+* Líneas
+* Polígonos
+* Multi-polígonos
+
+## 2. Mapas base y controles
+
+Para poder lanzar los ejemplos, necesitarás tener instalada la librería `leaflet`.
+
+```{r}
+# Descomenta la siguiente línea en el caso de que no lo tengas instalado
+# install.packages("leaflet")
+```
+
+Vamos a pintar un primer mapa.
+
+```{r}
+library(leaflet)
+library(dplyr)
+
+# leaflet() inicializa un mapa con controles, pero vacío
+# addTiles() proporciona las imágenes de fondo
+leaflet() %>%
+  addTiles()
+```
+
+> Fíjate en cómo puedes interactuar con el mapa: utiliza el zoom, desplázate por diferentes regiones y fíjate cómo se van actualizando solas las imágenes de fondo (los _tiles_).
+
+Es habitual centrar el mapa en un punto y darle un zoom adecuado dependiendo de lo que queramos visualizar. Lo podemos hacer con `setView`. Consulta la documentación de esta función para conocer todas las opciones.
+
+```{r}
+leaflet() %>%
+  addTiles() %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12)
+```
+
+Podemos personalizar las imágenes de fondo ajustando las _tiles_ utilizando `addProviderTiles` en lugar de `addTiles`. Algunas opciones:
+
+* `CartoDB.Positron`: muy limpios y claros, útiles para poner marcadores o colorear zonas.
+* `CartoDB.PositronNoLabels`: como la anterior, pero eliminando las etiqutas.
+* `CartoDB.DarkMatter` y `CartoDB.DarkMatterNoLabels`: la versión _dark_ de las anteriores, más adecuado si se integra en un cuadro de mando con un estilo oscuro generalizado.
+* `Stamen.Terrain`: con más descripción del terreneo, útil para zonas rurales o de montaña.
+
+Puedes consultar la lista completa [aquí](http://leaflet-extras.github.io/leaflet-providers/preview/index.html).
+
+```{r}
+leaflet() %>%
+  addProviderTiles("Stamen.Terrain") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12)
+```
+
+> Visita la lista completa y prueba más opciones sobre el mapa.
+
+## 3. Marcadores
+
+Los marcadores son los puntos que ponemos sobre el mapa, expresados como una latitud y longitud, y que solemos representar con forma de _pins_ o círculos.
+
+La fuente de datos puede ser variada:
+
+* Un dataframe geolocalizado, como los que devuelve `sf::read_sf`.
+* Matrices numéricas de dos columnas (longitud, latitud).
+* Un dataframe con columnas de latitud y longitud.
+* Vectores independientes de lat / lon.
+
+Podemos añadir uno o varios marcadores con `addMarkers`.
+
+```{r}
+leaflet() %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addMarkers(lng = -3.6845, lat = 40.4158, label = "Parque El Retiro")
+```
+
+> Pasa el ratón por encima del punto para comprobar que sale el nombre del marcador. El evento de mostrar algo mientras se pasa el ratón por encima se denomina `hover`.
+
+> Al igual que con ggplot, con leaflet vamos definiendo las diferentes capas y opciones de nuestro mapa. Ten cuidado y no te confundas, que con ggplot las capas se añadían con `+` y en leaflet es con `%>%`.
+
+También podemos añadir marcadores desde un dataframe. Ya sabíamos leer geojson con `sf::read_sf`.
+
+```{r}
+library(sf)
+
+# Leemos el geojson con las líneas de metro
+paradas_metro <- read_sf("dat/paradas_metro_madrid.geojson")
+head(paradas_metro)
+```
+
+
+```{r}
+# Nos quedamos con una sola línea, por ejemplo, la circular (L6)
+paradas_circular <- paradas_metro %>%
+  filter(line == "L6")
+
+nrow(paradas_circular)
+```
+
+Para mapear los marcadores de un dataframe, pasamos este como argumento de `leaflet()`. Y luego mapeamos los atributos de los marcadores (posición y etiqueta) a columnas del dataframe. Estas columnas van siempre precedidas del símbolo `~`. Esto es muy parecido a lo que hacíamos en `ggplot` mediante el uso de `aes(...)`.
+
+```{r}
+leaflet(data = paradas_circular) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addMarkers(lng = ~lng, lat = ~lat, label = ~name)
+```
+
+También podemos utilizar marcadores circulares, que suelen ser más fácilmente personalizables (tamaño, color, opacidad, borde, ...):
+
+```{r}
+leaflet(data = paradas_circular) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addCircleMarkers(lng = ~lng, lat = ~lat, label = ~name)
+```
+
+Consulta la documentación de `?addCircleMarkers` para ver todas las opciones. Un ejemplo con personalización:
+
+```{r}
+leaflet(data = paradas_circular) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addCircleMarkers(lng = ~lng, lat = ~lat, label = ~name,
+                   radius = 8,
+                   color = "gray",
+                   stroke = FALSE,
+                   fillOpacity = 0.5
+  )
+```
+
+## 4. Líneas y polígonos
+
+De forma parecida a como añadimos marcadores, podemos también representar líneas y polígonos en los mapas de `leaflet`.
+
+```{r}
+# Leemos el geojson con la definición de las líneas de metro
+lineas_metro <- read_sf("dat/lineas_metro.geojson")
+head(lineas_metro)
+```
+
+Y las podemos representar con `addPolylines`.
+
+```{r}
+leaflet(data = lineas_metro) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addPolylines(label = ~Texto)
+```
+
+Igual que hemos hecho con líneas, podemos hacerlo con polígonos:
+
+```{r}
+# Leemos el geojson con los barrios de Madrid
+barrios <- read_sf("dat/neighbourhoods.geojson")
+head(barrios)
+```
+
+```{r}
+leaflet(data = barrios) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addPolygons(label = ~neighbourhood)
+```
+
+## 3. Coropletas
+
+### Colores
+
+Los mapas de coropletas (_choropleths_) son mapas con regiones coloreadas en base al atributo que queremos representar. Ya sabemos cómo dibujar esas regiones, así que nos vamos a centrar ahora en cómo rellenarlas de color.
+
+Recordarás que con `ggplot` era muy fácil mapear columnas a colores. Cuando lo hacíamos con columnas continuas, ggplot utilizaba por defecto una escala secuencial; y cuando lo hacíamos con columnas categóricas, utilizaba una escala cualitativa (discreta).
+
+Con `leaflet` no es tan autómatico: necesitamos definir la escala y cómo se mapean los valores a ella.
+
+#### Escalas secuenciales
+
+Para aquellas columnas que sean continuas, tenemos dos opciones:
+
+* Utilizar una escala continua, es decir, un gradiente de colores, con `colorNumeric`
+* Discretizar ese gradiente en N colores, mediante `colorBin` o `colorQuantile`.
+
+> Consulta la documentación de las tres funciones.
+
+Podemos probar con los datos de las elecciones de 2019 en España.
+
+```{r}
+# Leemos los polígonos de un geojson que contiene las provincias españolas simplificadas
+provincias <- read_sf("dat/spain_provinces.geojson")
+
+# Leemos elecciones_2019_votos.csv con el número de votos por provincia y partido
+elecciones <- read.csv("dat/elecciones_2019_provincias.csv")
+
+# Calculamos el ratio de participación
+participacion <- elecciones %>%
+  mutate(ratio_participacion = round((votos_validos + votos_nulos) / censo_electoral, 3)) %>%
+  select(ccaa_nombre, provincia_cod_ine, ratio_participacion)
+
+# Añadimos al mapa el ratio de participación
+tmp <- provincias %>%
+  inner_join(participacion, by = c("codigo" = "provincia_cod_ine"))
+
+head(tmp)
+```
+
+Los datos de participación son numéricos, por lo que su escala será secuencial.
+
+Primero, veamos cómo lo mapearíamos a una escala continua con `colorNumeric`.
+
+```{r}
+# Blues es el nombre de la paleta en colorbrewer2 (https://colorbrewer2.org/)
+pal_numeric <- colorNumeric(
+  palette = "Blues",
+  domain  = tmp$ratio_participacion
+)
+```
+
+> Prueba a cambiar la paleta de colores por otra de tu elección
+
+```{r}
+# Aquí no tiene sentido centrar la vista en una latitud longitud real
+# ni poner los tiles de fondo porque nuestro geojson está simplificado
+# y no está situado en las coordenadas "reales"
+map_numeric <- leaflet(data = tmp) %>%
+  addPolygons(color       = ~pal_numeric(ratio_participacion),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1
+  )
+
+map_numeric
+```
+
+Las provincias pueden tomar cualquier valor entre el mínimo (blanco) y el máximo (azul muy intenso), correspondiente con su nivel de participación.
+
+La alternativa sería utilizar una escala discretizada. Con `colorBin` dividiremos el espectro de posibles colores en el número de _bins_ que decidamos.
+
+```{r}
+pal_bin <- colorBin(
+  palette = "Blues",
+  domain  = tmp$ratio_participacion,
+  bins    = 4
+)
+
+map_bin <- leaflet(data = tmp) %>%
+  addPolygons(color       = ~pal_bin(ratio_participacion),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1
+  )
+
+map_bin
+```
+
+Y `colorQuantile` es similar a `colorBin`, pero utiliza cuantiles para hacer los cortes.
+
+```{r}
+pal_quantile <- colorQuantile(
+  palette = "Blues",
+  domain  = tmp$ratio_participacion,
+  n       = 4
+)
+
+map_quantile <- leaflet(data = tmp) %>%
+  addPolygons(color       = ~pal_bin(ratio_participacion),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1
+  )
+
+map_quantile
+```
+
+> Fíjate en cómo cambia de colorBin a colorQuantile. El corte mediante bins, por defecto, corta el rango de colores en trozos de igual longitud. En cambio, por cuantiles (como hemos dicho 4, será por cuartiles), corta el rango para que haya el mismo número de observaciones en cada trozo (con la excepción de que tuviéramos valores repetidos, que provocaría trozos con más o menos observaciones).
+
+#### Escalas cualitativas
+
+Para crear escalas cualitativas (discretas), utilizamos `colorFactor`.
+
+Vamos a ilustrarlo con un ejemplo muy simple, coloreando las provincias por comunidad autónoma.
+
+```{r}
+pal_factor <- colorFactor(
+  palette = "Set1",
+  domain  = tmp$ccaa_nombre
+)
+
+map_factor <- leaflet(data = tmp) %>%
+  addPolygons(color       = ~pal_factor(ccaa_nombre),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1
+  )
+
+map_factor
+```
+
+## 4. Leyendas y capas
+
+### Leyendas
+
+Mirando los mapas de coropletas que acabamos de generar, hay una cosa que automáticamente echamos en falta: leyendas. Son necesarias para entender el mapeo de colores.
+
+Las leyendas las podemos añadir utilizando `addLegend` y ajustando sus parámetros según nuestra necesidad.
+
+```{r}
+# Consulta la documentación sobre los parámetros que estamos ajustando aquí
+map_numeric %>%
+  addLegend(
+    position = "bottomright",
+    pal      = pal_numeric,
+    values   = ~ratio_participacion,
+    title    = "Ratio de participación"
+  )
+```
+
+Podemos sobrescribir el aspecto de los valores de la leyenda con `labFormat`.
+
+```{r}
+map_bin %>%
+  addLegend(
+    position = "bottomright",
+    pal      = pal_bin,
+    values   = ~ratio_participacion,
+    title    = "Ratio de participación",
+    labFormat = labelFormat(suffix = "%", transform = function(x) 100 * x),
+  )
+```
+
+> Nota: haz lo mismo con map_quantile (quitando el parámetro labFormat), la escala que hemos discretizado por cuantiles. Fíjate en cómo queda la leyenda. Los porcentajes indican dónde cae el 25% de los valores más bajos, el 25% siguiente, ... y así. En este caso, como la participación es un ratio, puede ser muy confuso mostrar esa leyenda a los usuarios: podrían pensar que hay regiones con una participación de menos del 25%.
+
+### Capas
+
+Cada `addMarkers`, `addPolygons`, ... que utilizamos añade una capa sobre nuestro mapa. Podemos añadir controles para superponerlas o elegir mostrar solo una de las activas.
+
+Por ejemplo, podemos ver el ratio de votos a una serie de partidos.
+
+```{r}
+# Leemos los datos de votos
+votos <- read.csv("dat/elecciones_2019_votos.csv")
+
+# Nos quedamos solo con algunos partidos y calculamos el % de voto
+# TODO: si te interesa, puedes juntar coaliciones (p.e. contar
+# los votos de encomupodem como podemos)
+votos_partidos <- votos %>%
+  filter(partido %in% c("psoe", "pp", "vox", "podemos")) %>%
+  inner_join(elecciones) %>%
+  mutate(ratio_votos = round(votos / votos_validos, 3)) %>%
+  select(provincia_cod_ine, partido, ratio_votos)
+
+head(votos_partidos)
+```
+
+```{r}
+# La función pivot_wider pertenece al paquete tidyr
+# Si no lo tienes instalado, descomenta esta línea para hacerlo
+# install.packages("tidyr")
+library(tidyr)
+
+# Los pasamos a formato ancho para tener una fila por provincia y
+# una columna con el ratio de votos por cada partido, y mapearlas
+# en capas diferentes
+votos_partidos_ancho <- votos_partidos %>%
+  pivot_wider(names_from = partido, values_from = ratio_votos)
+
+# Lo incorporamos al objeto con la información de los polígonos
+# Cuidado: si hacemos el join al revés (left = votos y right = provincias)
+# perdemos el tipo de dato de objeto espacial y luego leaflet no sabe
+# pintarlo
+mapa_votos <- provincias %>%
+  inner_join(votos_partidos_ancho, by = c("codigo" = "provincia_cod_ine"))
+
+head(mapa_votos)
+```
+
+Ahora que ya tenemos el dataset preparado, podemos representarlo. Con el parámetro `group` de cada capa y `addLayersControl` añadimos el control para elegir qué capa mostrar. Consulta la documentación de esta función para ver todas las posibilidades.
+
+```{r}
+# Creo una paleta por partido
+pal_votos_psoe <- colorBin(
+  palette = "Reds",
+  domain  = mapa_votos$psoe,
+  bins    = 5
+)
+
+pal_votos_pp <- colorBin(
+  palette = "Blues",
+  domain  = mapa_votos$pp,
+  bins    = 5
+)
+
+pal_votos_vox <- colorBin(
+  palette = "Greens",
+  domain  = mapa_votos$vox,
+  bins    = 5
+)
+
+pal_votos_podemos <- colorBin(
+  palette = "Purples",
+  domain  = mapa_votos$vox,
+  bins    = 5
+)
+
+# Pinto el mapa, con una capa por ratio de votos a ese partido
+leaflet(data = mapa_votos) %>%
+  # Capa del PSOE
+  addPolygons(color       = ~pal_votos_psoe(psoe),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "PSOE"
+  ) %>%
+  # Capa del PP
+  addPolygons(color       = ~pal_votos_pp(pp),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "PP"
+  ) %>%
+  # Capa de VOX
+  addPolygons(color       = ~pal_votos_vox(vox),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "VOX"
+  ) %>%
+  # Capa de Podemos
+  addPolygons(color       = ~pal_votos_podemos(podemos),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "Podemos"
+  ) %>%
+  # Control de capas
+  addLayersControl(
+    baseGroups = c("PSOE", "PP", "VOX", "Podemos"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+En casos como este tenemos bastante información por región: de cada provincia, tenemos el % de voto a 4 partidos diferentes. Es útil que añadamos un resumen de esta información al _tooltip_ o _popup_.
+
+La diferencia entre tooltip y popup es que el primero se muestra al pasar por encima y no admite texto formateado con HTML, y el segundo se muestra al hacer click y sí permite HTML.
+
+Vamos a ver un caso con _popups_ y texto formateado con HTML:
+
+```{r}
+# Queremos que al hacer click, salga el nombre de la provincia y
+# el % de voto a cada uno de los partidos. Las etiquetas html que usamos, sirven para:
+# - strong: poner en negrita
+# - br: salto de línea
+# - ul: lista de elementos
+# - li: cada uno de los elementos de ul
+mapa_votos <- mapa_votos %>%
+  mutate(
+    # Reemplazo los NAs por 0
+    # Son casos en los que estos partidos fueron en coalición
+    psoe    = replace_na(psoe,    0),
+    pp      = replace_na(pp,      0),
+    vox     = replace_na(vox,     0),
+    podemos = replace_na(podemos, 0),
+    # Creamos el popup
+    popup   = paste0("<strong>",      nombre,        "</strong><br/><ul>",
+                     "<li>PSOE: ",    psoe * 100,    "%</li>",
+                     "<li>PP: ",      pp * 100,      "%</li>",
+                     "<li>VOX: ",     vox * 100,     "%</li>",
+                     "<li>Podemos: ", podemos * 100, "%</li></ul>")
+  )
+
+head(mapa_votos)
+```
+
+Ahora puedo añadir el popup a cada una de las capas.
+
+```{r}
+# Pinto el mapa, con una capa por ratio de votos a ese partido
+leaflet(data = mapa_votos) %>%
+  # Capa del PSOE
+  addPolygons(color       = ~pal_votos_psoe(psoe),
+              popup       = ~popup,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "PSOE"
+  ) %>%
+  # Capa del PP
+  addPolygons(color       = ~pal_votos_pp(pp),
+              popup       = ~popup,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "PP"
+  ) %>%
+  # Capa de VOX
+  addPolygons(color       = ~pal_votos_vox(vox),
+              popup       = ~popup,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "VOX"
+  ) %>%
+  # Capa de Podemos
+  addPolygons(color       = ~pal_votos_podemos(podemos),
+              popup       = ~popup,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "Podemos"
+  ) %>%
+  # Control de capas
+  addLayersControl(
+    baseGroups = c("PSOE", "PP", "VOX", "Podemos"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+Si haces click sobre una de las provincias, deberías ver un _popup_ como este:
+
+![](resources/popup.png)
+
+## Profundiza
+
+Para saber más sobre los conceptos que hemos visto, puedes consultar alguna de estas referencias:
+
+* [Documentación web de leaflet](https://rstudio.github.io/leaflet/): imprescindible, profundiza sobre todas las posibilidades que tiene la librería, ilustrado con ejemplos.
+* [Chuleta de leaflet](https://github.com/rstudio/cheatsheets/raw/master/leaflet.pdf): sintetiza las funciones más habituales para leaflet Muy útil para tener a mano a la hora de utilizar la librería.
+* [Tiles de leaflet](https://rstudio.github.io/leaflet/basemaps.html): detalla cómo utilizar los _tiles_, cómo funcionar algunos de ellos y un listado con todos los disponibles.
+
+## Conclusiones
+
+Nos podemos quedar con las siguientes ideas como resumen de este tema:
+
+* Las herramientas de gráficos interactivas nos dan más posibilidades para comunicar información, con elementos donde hacer zoom, clickar para ampliar información, intercambiar capas, etc.
+* Leaflet es la herramienta interactiva de visualización de mapas por excelencia.
+* Los _tiles_ son las imágenes de fondo del mapa y son personalizables dependiendo de si queremos destacar las calles, el terreno u otros elementos geográficos.
+* Podemos representar marcadores, líneas y polígonos como capas de leaflet
+* Para mapear propiedades del mapa a columnas del dataframe, utilizamos el prefijo `~mi_columna`.
+
+## Actividades
+
+### Actividad 1
+
+Pinta el metro de Madrid, con:
+
+* Las paradas
+* Las líneas de metro, cada una con un color diferente.
+
+_Nota_: No vale crear una capa por línea diferente de metro, todas las líneas deben ir en la misma.
+
+_Bonus_: personaliza los colores con el suyo oficial (línea 2 en rojo, línea 7 en naranja, ...)
+
+### Actividad 2
+
+Reproduce un mapa con el % de voto a cada uno de los 4 principales partidos por Comunidad Autónoma, en lugar de por provincia.
+
+Necesitarás, además de los datos que ya hemos ido usando en este fastbook, los siguientes:
+
+* `dat/provincias_ccaas.csv`: con el detalle de qué provincia pertenece a cada comunidad autónoma (mediante sus códigos INE).
+* `dat/spain_ccaas.geojson`: con el geojson de las comunidades autónomas simplificado
+
+### Actividad 3
+
+Lee `dat/listings.csv`. Contiene un listado de alojamientos anunciados en AirBnB en Madrid.
+
+Coge aleatoriamente una muestra de 500 alojamientos y píntalos sobre un mapa de Madrid. Cada marcador debe tener un color diferente dependiendiendo del tipo (`room_type`).
+
+### Actividad 4 (bonus)
+
+Los datos sobre los alojamientos de AirBnB están descargados de [aquí](http://insideairbnb.com/get-the-data.html). Cada ciudad, tiene:
+
+* `listings.csv`: con un resumen de los datos más relevantes por cada alojamiento.
+* `neighbourhoods.geojson`: con el geojson de los barrios.
+
+Y además, un panel donde se visualizan alguno de esos datos en un mapa (de leaflet!) y gráficas e indicadores a la derecha. P.e. [este](http://insideairbnb.com/madrid/) es el de Madrid.
+
+Reproduce con leaflet (mapas) y ggplot (gráficas) los gráficos que se pintan en el panel, sobre una ciudad de tu elección.

@@ -43,3 +43,8 @@ docs/
 
 # translation temp files
 po/*~
+
+*.docx
+*.zip
+gestion/
+*.html
