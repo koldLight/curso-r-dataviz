@@ -1,6 +1,6 @@
 # Curso de visualización de datos en R
 
-## 1. Presentación del curso
+## 1. Presentación del curso
 
 La visualización es una parte esencial de cualquier proyecto de datos. Nos ayuda a comprender la estructura de nuestro dataset y a detectar patrones y outliers.
 
