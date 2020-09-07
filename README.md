@@ -78,7 +78,7 @@ El objetivo de esta asignatura es conocer en líneas generales la teoría de la 
 
 Para el desarrollo de la asignatura es necesario contar con los siguientes paquetes de R instalados: ggplot2, scales, rjson, leaflet, dplyr, plotly, rmarkdown, flexdashboard y shiny.
 
-Además, nos resultará muy útil tener a mano las siguientes “chuletas” de uso de las herramientas que vamos a utilizar:
+Además, nos resultará muy útil tener a mano las siguientes _chuletas_ de uso de las herramientas que vamos a utilizar:
 
 * ggplot2: https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf
 * leaflet: https://github.com/rstudio/cheatsheets/raw/master/leaflet.pdf

@@ -1,0 +1,40 @@
+---
+title: "Diapositivas"
+author: "Luz Frias"
+output:
+  ioslides_presentation:
+    incremental: true
+    transition: 0.5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
+```
+
+## Diapositiva con listado
+
+* Elemento 1
+* Elemento 2
+* Elemento 3
+
+## Diapositiva con tabla
+
+```{r}
+library(palmerpenguins)
+library(ggplot2)
+library(dplyr)
+
+tmp <- penguins %>%
+  select(species, bill_length_mm, bill_depth_mm, sex) %>%
+  head()
+
+knitr::kable(tmp)
+```
+
+## Diapositiva con gráfico
+
+```{r}
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+```
+

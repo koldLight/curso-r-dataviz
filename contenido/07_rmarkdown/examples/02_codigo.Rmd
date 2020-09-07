@@ -1,0 +1,43 @@
+---
+title: "2 - Código"
+author: "Luz Frias"
+output: html_document
+---
+
+2 más 5 es `r 2 + 5`.
+
+Un bloque de código con resultado numérico:
+
+```{r}
+x <- 2
+y <- 5
+
+x + y
+```
+
+Una tabla:
+
+```{r}
+library(palmerpenguins)
+
+knitr::kable(head(penguins))
+```
+
+Y un gráfico:
+
+```{r}
+library(ggplot2)
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+```
+
+Este mismo gráfico, pero evitando los warnings:
+
+```{r, warning = FALSE}
+library(ggplot2)
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+```
+

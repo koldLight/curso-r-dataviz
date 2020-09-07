@@ -1,0 +1,43 @@
+---
+title: "3 - HTML y PDF"
+author: "Luz Frias"
+output:
+  html_document:
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    highlight: tango
+    theme: paper
+  pdf_document:
+    toc: true
+    highlight: tango
+---
+
+# Formato a HTML y PDF
+
+Este documento se puede exportar a HTML y PDF. Fíjate que, en la sección de `output`, cada formato lleva su propia personalización.
+
+## Mi análisis exploratorio {.tabset}
+
+Esta sección se mostrará con pestañas únicamente en HTML. En PDF, al no ser un formato interactivo, se mostrarán las secciones una debajo de la otra.
+
+### Gráfico 1
+
+Contenido de la primera pestaña
+
+### Gráfico 2
+
+Contenido de la segunda pestaña
+
+## Ejemplo de código
+
+Para ver el efecto de alterar el parámetro `highlight`.
+
+```{r, warning = FALSE}
+library(ggplot2)
+library(palmerpenguins)
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+```

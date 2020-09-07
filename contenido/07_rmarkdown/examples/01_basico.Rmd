@@ -1,0 +1,61 @@
+---
+title: "Ejemplo 1 - básicos"
+author: "Luz Frias"
+output: html_document
+---
+
+# Ejemplos básicos
+
+## Título de nivel 2
+
+### Título de nivel 3
+
+Estoy escribiendo un párrafo.
+
+Este es otro diferente.
+
+Ahora todo en el mismo párrafo.  
+Pero con un salto de línea.
+
+Esto es **muy importante**.
+
+Voy a hacer un análisis exploratorio sobre este *dataset*.
+
+> Those hours of practice, and failure, are a necessary part of the learning process. Gina Sipley.
+
+
+> Any fool can write code that a computer can understand. Good programmers write code that humans can understand.
+>
+> *Martin Fowler*
+
+Mi lista numerada:
+
+1. Introducción
+2. Compilación
+3. Elementos
+    1. Markdown
+    2. Bloques de código
+4. formatos
+
+Mi lista no-numerada:
+
+* Introducción
+* Compilación
+* Elementos
+    * Markdown
+    * Bloques de código
+* Formatos
+
+Utilizamos [GitHub](https://github.com/) para publicar código libre.
+
+```
+library(ggplot2)
+library(palmerpenguins)
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+```
+
+Be H~2~O my friend.
+
+^40^K es un isótopo radioactivo del potasio.
