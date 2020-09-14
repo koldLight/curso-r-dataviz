@@ -1,0 +1,500 @@
+---
+title: "9 - Shiny - nivel básico"
+author: "Luz Frias"
+output:
+  html_document:
+    highlight: null
+    theme: flatly
+  pdf_document: default
+---
+
+```{r setup, echo=FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+## ¿Qué vamos a hacer?
+
+En _fastbooks_ anteriores hemos visto bastantes utilidades para visualizar datos de manera interactiva: `plotly` para crear gráficos, `leaflet` para mapas, `R Markdown` para documentos y `flexdashboard` para cuadros de mando. En estos dos _fastbooks_ veremos cómo construir aplicaciones web interactivas directamente desde R, utilizando Shiny.
+
+Deberás tener el paquete `shiny` instalado.
+
+```{r}
+# Descomenta la siguiente línea en el caso de que no lo tengas instalado
+# install.packages("shiny")
+```
+
+Antes de continuar, explora la [galería de ejemplos de Shiny](https://shiny.rstudio.com/gallery/#demos). También te resultará muy útil tener a mano la [chuleta de Shiny](https://shiny.rstudio.com/images/shiny-cheatsheet.pdf).
+
+Este _fastbook_ viene acompañado de una carpeta de ejemplos, que deberás tener a mano para poder ejecutar las aplicaciones que iremos viendo.
+
+## Arquitectura
+
+### Interfaz gráfica y servidor
+
+Una aplicación de shiny suele estar generada por script llamado `app.R`. Está formada por dos elementos principales:
+
+* La interfaz gráfica: contiene el _layout_ y aspecto de la aplicación. Genera el HTML que verá el usuario.
+* Las funciones de servidor: controla la lógica necesaria para lanzar la aplicación y responder a las acciones del usuario (clicks, selecciones, etc.).
+
+Estos dos elementos pueden estar en el mismo script `app.R` (útil si es una aplicación muy sencilla), o en tres separados (más recomendable para casos complejos): `app.R`, `ui.R` y `server.R`.
+
+Para ejecutar la aplicación, hay que llamar a `shinyApp(ui, server)`.
+
+Hay que tener en cuenta que, con Shiny, vamos a desarrollar aplicaciones web que necesitan de un servidor. Hasta ahora, generábamos documentos html _standalone_ que solo necesitaban un explorador web para ser visualizados, pero no un servidor. Esto significa que es necesario un sitio (un ordenador propio, o en la nube) que lo ejecute y responda a las acciones del usuario. Por este motivo, cuando lancemos una aplicación en local, veremos que R Studio se queda esperando, y nos dice en qué puerto ha desplegado la aplicación.
+
+Por ejemplo, prueba a lanzar:
+
+```
+library(shiny)
+runExample("01_hello")
+```
+
+Verás que sale un mensaje en la consola parecido a este:
+
+![](resources/run_shiny.png)
+
+Cuando cierres la ventana que se abre al ejecutarlo, R Studio matará la aplicación. Si la has abierto en un explorador adicional, verás que se queda en gris: esto significa que el servidor ya no está escuchando y no podrás interactuar con ella.
+
+### Nuestra primera aplicación
+
+Vamos a crear nuestra primera aplicación en shiny: un histograma en el que el usuario puede ajustar el número de _bins_ utilizado.
+
+Al comienzo del script, es habitual tener todas las librerías que vamos a necesitar:
+
+```
+# Librerías necesarias
+library(shiny)
+library(palmerpenguins)
+library(ggplot2)
+```
+
+La interfaz gráfica tendrá:
+
+* Un panel lateral con los _inputs_ del usuario: en este caso, un selector del tipo _slider_ para elegir el número de _bins_.
+* Un panel principal con el _output_: el gráfico generado.
+
+```
+# La interfaz gráfica
+ui <- fluidPage(
+  
+  # El título de la aplicación
+  titlePanel("Distribución del peso en los pingüinos"),
+  
+  # Un panel que tiene una zona más pequeña en el lateral izquierdo,
+  # y un panel principal más grande a la derecha
+  sidebarLayout(
+    
+    # Usaremos el panel izquierdo para los inputs
+    sidebarPanel(
+      
+      # Input de tipo slider, para seleccionar el número
+      # de bins del histograma
+      sliderInput(inputId = "bins",
+                  label = "Número de bins:",
+                  min = 1,
+                  max = 50,
+                  value = 25)
+      
+    ),
+    
+    # El panel principal con los outputs
+    mainPanel(
+      
+      # El histograma
+      plotOutput(outputId = "histogram")
+      
+    )
+  )
+)
+```
+
+> Tienes una referencia más completa de los elementos de interfaz que puedes utilizar en la [chuleta](https://shiny.rstudio.com/images/shiny-cheatsheet.pdf), en la sección de _layouts_ e _inputs_.
+
+Y un servidor, con una función `renderPlot`, con estas características:
+
+* Es reactiva: se vuelve a ejecutar cada vez que cambia alguno de sus inputs. En este caso, cada vez que cambia `input$bins`.
+* La salida es un gráfico.
+
+```
+# El servidor
+server <- function(input, output) {
+  
+  # Genera el histograma con el número de bins seleccionado
+  output$histogram <- renderPlot({
+    ggplot(penguins, aes(x = body_mass_g)) +
+      geom_histogram(bins = input$bins)
+  })
+  
+}
+```
+
+Para generar la aplicación, utilizamos:
+
+```
+shinyApp(ui = ui, server = server)
+```
+
+Puedes lanzar este ejemplo desde la consola con:
+
+```
+library(shiny)
+runApp("examples/01_histograma")
+```
+
+![](resources/01_histograma.png)
+
+También puedes ejecutarla desde R Studio, abriendo el script `app.R` y haciendo click en `Run App`.
+
+![](resources/run_app.png)
+
+### Gráficos interactivos de plotly
+
+Lo habitual es que, para aprovechar la interactividad de Shiny, utilicemos elementos interactivos. Vamos a ver un ejemplo sacando un gráfico de plotly.
+
+La interfaz gráfica será parecida al caso anterior, pero en este caso:
+
+* Ponemos un selector de lista, para permitir que el usuario elija la propiedad (longitud del pico, peso, ...) sobre la que mostrar el histograma.
+* La salida ya no será un _plot_ estático, sino un gráfico de _plotly_. Utilizaremos `plotlyOutput` en lugar de `plotOutput`.
+
+```
+library(shiny)
+library(palmerpenguins)
+library(plotly)
+
+# La interfaz gráfica
+ui <- fluidPage(
+  
+  # El título de la aplicación
+  titlePanel("Distribución de las propiedades de los pingüinos"),
+  
+  # Un panel que tiene una zona más pequeña en el lateral izquierdo,
+  # y un panel principal más grande a la derecha
+  sidebarLayout(
+    
+    # Usaremos el panel izquierdo para los inputs
+    sidebarPanel(
+      
+      # Input de tipo select sobre una lista de opciones
+      selectInput(
+        inputId = "property",
+        label   = "Propiedad",
+        choices = list("Longitud del pico"    = "bill_length_mm",
+                       "Profundidad del pico" = "bill_depth_mm",
+                       "Longitud de la aleta" = "flipper_length_mm",
+                       "Peso"                 = "body_mass_g")
+      )
+      
+    ),
+    
+    # El panel principal con los outputs
+    mainPanel(
+      
+      # El histograma
+      plotlyOutput(outputId = "histogram")
+      
+    )
+  )
+)
+```
+
+La función de servidor ahora producirá un gráfico de plotly, por lo que usaremos `renderPlotly` en lugar de `renderPlot`.
+
+```
+# El servidor
+server <- function(input, output) {
+  
+  # Genera el histograma sobre la propiedad seleccionada
+  output$histogram <- renderPlotly({
+    plot_ly(penguins, x = ~get(input$property), type = "histogram", nbinsx = input$bins) %>%
+      layout(xaxis = list(title = "Propiedad"))
+  })
+  
+}
+
+# Generamos la aplicación
+shinyApp(ui = ui, server = server)
+```
+
+> Fíjate en el truco de get(). La estamos utilizando para transformar una cadena de texto en un objeto.
+
+Puedes ejecutar el ejemplo lanzando:
+
+```
+library(shiny)
+runApp("examples/02_plotly")
+```
+
+![](resources/02_plotly.png)
+
+### Mapas de leaflet
+
+También podemos representar mapas con `leaflet`. Con respecto a los ejemplos anteriores, solo cambia:
+
+* En la interfaz gráfica, el output se genera con `leafletOutput(map_id)`.
+* En el servidor, se utiliza la función `renderLeaflet`.
+
+Para ilustarlo, vamos a ver un ejemplo muy simple, en el que permitimos al usuario elegir el _tile_ del mapa entre una serie de opciones.
+
+```
+library(shiny)
+library(leaflet)
+
+# La interfaz gráfica
+ui <- fluidPage(
+  
+  # El título de la aplicación
+  titlePanel("Mapas base de leaflet"),
+  
+  # Un panel que tiene una zona más pequeña en el lateral izquierdo,
+  # y un panel principal más grande a la derecha
+  sidebarLayout(
+    
+    # Usaremos el panel izquierdo para los inputs
+    sidebarPanel(
+      
+      # Input de tipo select sobre una lista de opciones, para los mapas base
+      selectizeInput(
+        inputId = "provider_name",
+        label   = "Tile",
+        choices = names(providers)
+      )
+      
+    ),
+    
+    # El panel principal con los outputs
+    mainPanel(
+      
+      # El histograma
+      leafletOutput(outputId = "map")
+      
+    )
+  )
+)
+
+# El servidor
+server <- function(input, output) {
+  
+  # Genera el mapa con el proveedor de tiles seleccionado
+  output$map <- renderLeaflet({
+    leaflet() %>%
+      addProviderTiles(input$provider_name) %>%
+      setView(lng = -3.69, lat = 40.43, zoom = 6)
+  })
+  
+}
+
+# Generamos la aplicación
+shinyApp(ui = ui, server = server)
+```
+
+> No todos los mapas base funcionarán, ya que algunos necesitan _api keys_.
+
+Puedes ejecutar el ejemplo con:
+
+```
+library(shiny)
+runApp("examples/03_leaflet")
+```
+
+![](resources/03_leaflet.png)
+
+> Tienes una referencia más completa de los elementos de salida que puedes utilizar en la [chuleta](https://shiny.rstudio.com/images/shiny-cheatsheet.pdf), en la sección de _outputs_. Fíjate en que puedes generar texto, tablas estáticas o interactivas (_DataTables_), etc.
+
+## Interfaz de usuario
+
+### Layout
+
+Vamos a profundizar en la creación de interfaces de usuario. El _layout_ es la distribución que siguen los diferentes componentes de nuestra aplicación. Utilizamos la función `fluidPage` para crear una vista que se ajusta automáticamente al tamaño del explorador del usuario. Y creamos la interfaz añadiendo elementos de forma jerárquica dentro de dicha función.
+
+Una distribución muy habitual es la que hemos visto en los ejemplos anteriores, con un panel lateral para los _inputs_ y otro principal para los _outputs_.
+
+```
+ui <- fluidPage(
+  titlePanel("título"),
+
+  sidebarLayout(
+    sidebarPanel("panel de inputs"),
+    mainPanel("panel principal (outputs)")
+  )
+)
+```
+
+![](resources/layout_01.png)
+
+> Consulta todas las opciones de cada uno de los elementos en su ayuda, como p.e. en `?sidebarLayout`. Prueba a modificar el ejemplo anterior, situando el panel de _inputs_ a la derecha en lugar de a la izquierda.
+
+> Consulta la [guía completa de layouts en Shiny](https://shiny.rstudio.com/articles/layout-guide.html) para explorar más opciones.
+
+### Elementos HTML
+
+Dentro del _panel_, podemos añadir elementos HTML como títulos, párrafos o imágenes. Los más habituales son:
+
+| función       | Descripción                  |
+| ------------- | ---------------------------- |
+| p             | Párrafo                      |
+| h1 ... h6     | Título de nivel 1 hasta 6    |
+| a             | Link                         |
+| code          | Bloque de código formateado  |
+| img           | Imagen                       |
+| strong        | Texto en negrita             |
+| em            | Texto en cursiva             |
+| br            | Salto de línea               |
+
+Como ejemplo, vamos a pintar una serie de elementos de interfaz.
+
+```
+ui <- fluidPage(
+  titlePanel("título"),
+  
+  sidebarLayout(
+    sidebarPanel("panel de inputs"),
+    mainPanel(
+      h1("Título de nivel 1"),
+      h2("Título de nivel 2"),
+      h3("Título de nivel 3"),
+      h4("Título de nivel 4"),
+      h5("Título de nivel 5"),
+      h5("Título de nivel 6"),
+      p("Párrafo"),
+      br(),
+      strong("Texto en negrita"),
+      br(),
+      em("Texto en cursiva"),
+      br(),
+      code("bloque de código formateado"),
+      br(),
+      a("Link", src="https://shiny.rstudio.com/"),
+      br(),
+      img("Imagen", src="https://shiny.rstudio.com/images/logoRStudio.svg")
+    )
+  )
+)
+```
+
+![](resources/layout_02.png)
+
+## Controles
+
+Los controles son los _widgets_ con los que puede interactuar el usuario para modificar los _inputs_ de la aplicación. Shiny nos proporciona los siguientes:
+
+![](resources/control_widgets.png)
+
+> Puedes comprobar cómo es la interacción con ellos en la [galería de widgets de shiny](https://shiny.rstudio.com/gallery/widget-gallery.html).
+
+Las funciones correspondientes son:
+
+| función       | Descripción                  |
+| ------------- | ---------------------------- |
+| actionButton       | Botón |
+| checkboxInput      | Checkbox |
+| checkboxGroupInput | Grupo de checkboxes |
+| dateInput          | Selector de fecha |
+| dateRangeInput     | Selector de rango de fecha |
+| fileInput          | Botón para subir un fichero |
+| helpText           | Texto de ayuda |
+| numericInput       | Input para un valor numérico |
+| radioButtons       | Selector de tipo radio (solo un valor permitido del grupo) |
+| selectInput        | Selector de lista de valores |
+| sliderInput        | Input para un valor numérido con un _slider_ |
+| textInput          | Input para una cadena de texto |
+
+El primer argumento de todos estos controles es el `inputId`. Este ID es el que nos permite conectarlo a las funciones reactivas de servidor y modificar los _outputs_ en función de los _inputs_.
+
+Vamos a verlo con un ejemplo muy sencillo, en el que simplemente repetimos el texto que ha introducido el usuario:
+
+```
+library(shiny)
+
+# La interfaz gráfica
+ui <- fluidPage(
+  
+  # El título de la aplicación
+  titlePanel("título"),
+  
+  # Panel con barra al lateral
+  sidebarLayout(
+    
+    # Usaremos el panel izquierdo para los inputs
+    sidebarPanel(
+      
+      # Input de tipo texto, con ID input_text
+      textInput(
+        inputId = "input_text",
+        label   = "Escribe algo"
+      )
+      
+    ),
+    
+    # El panel principal con los outputs
+    mainPanel(
+      
+      # Output de tipo texto, con ID output_text
+      textOutput(outputId = "output_text")
+      
+    )
+  )
+)
+
+# El servidor
+server <- function(input, output) {
+  
+  # Genera el output output_text utilizando input_text
+  output$output_text <- renderText({
+    paste("El usuario ha escrito:", input$input_text)
+  })
+  
+}
+
+# Generamos la aplicación
+shinyApp(ui = ui, server = server)
+```
+
+Puedes ejecutar el ejemplo con:
+
+```
+library(shiny)
+runApp("examples/04_widget")
+```
+
+![](resources/04_widget.png)
+
+## Profundiza
+
+Para saber más sobre los conceptos que hemos visto, puedes consultar alguna de estas referencias:
+
+* [Chuleta de Shiny](https://shiny.rstudio.com/images/shiny-cheatsheet.pdf): muy útil para tener a mano los comandos más habituales de Shiny.
+* [Galeria](https://shiny.rstudio.com/gallery/): ejemplos con código y resultado de varios cuadros de mando y aplicaciones desarrolladas con R Shiny.
+* [Tutoriales en vídeo](https://shiny.rstudio.com/tutorial/): una serie de tutoriales de todos los niveles sobre el manejo de Shiny.
+* [Guía de layouts en Shiny](https://shiny.rstudio.com/articles/layout-guide.html): artículo más completo sobre el uso de _layouts_.
+
+## Conclusiones
+
+Nos podemos quedar con las siguientes ideas como resumen de este tema:
+
+* Con Shiny creamos aplicaciones web utilizando R.
+* Una aplicación tiene dos componentes: la interfaz gráfica y el servidor.
+* Los controles de usuario son los _inputs_.
+* Como _outputs_ podemos generar gráficas, tablas, texto, mapas, ...
+
+## Actividades
+
+### Actividad 1
+
+Crea una aplicación, utilizando el dataset de los pingüinos, que tenga:
+
+* Como inputs, unos _radio buttons_ para elegir el sexo.
+* Como outputs: 
+
+    * Un gráfico de puntos de _plotly_ mostrando en el eje x el peso, y en el eje y la longitud de la aleta, y con un color diferente por especie, solo para el sexo escogido.
+    * Una _datatable_ paginada con el detalle de especie, sexo, peso y longitud de la aleta, para el sexo escogido.
+
+### Actividad 2
+
+Crea una aplicación de shiny para visualizar las líneas y paradas del metro de Madrid sobre un mapa interactivo.
+
+Tienes disponible los datos en `dat/lineas_metro.geojson` y `dat/paradas_metro_madrid.geojson`.
+
+La aplicación tendrá:
+
+* Como inputs, el listado de líneas disponibles.
+* Como output, un mapa de `leaflet` mostrando la línea y sus paradas sobre Madrid.
