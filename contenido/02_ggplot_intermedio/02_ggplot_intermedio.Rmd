@@ -456,7 +456,7 @@ Rescata el gráfico que hiciste en el fastbook anterior, pero añadiendo el terc
 
 1. Lee los datos de las elecciones presidenciales de EEUU (dat/usa_president.csv)
 
-2. Quédate únicamente con los datos de las elecciones de 2016, con los resultados de los partidos demócrata y republicano, y con las filas con writein = TRUE.
+2. Quédate únicamente con los datos de las elecciones de 2016, con los resultados de los partidos demócrata y republicano, y con las filas con writein = FALSE.
 
 3. Quédate con el número de votos demócratas y republicanos para cada estado.
 
@@ -470,7 +470,7 @@ El resultado final será algo así:
 
 1. Lee los datos de las elecciones presidenciales de EEUU (dat/usa_president.csv)
 
-2. Como antes, quédate únicamente con los datos de las elecciones de 2016, con los resultados de los partidos demócrata y republicano, y con las filas con writein = TRUE.
+2. Como antes, quédate únicamente con los datos de las elecciones de 2016, con los resultados de los partidos demócrata y republicano, y con las filas con writein = FALSE.
 
 3. Calcula para cada estado, una columna nueva que se llame `rep_preference` definida como `(votos_republicanos / (votos_republicanos + votos_democratas) - 0.5) * 2` . Esta columna tendrá valores cercanos al 0 para estados donde hubo un resultado cercano al empate, acercándose al 1 si ganaron los republicanos y acercándose al -1 si ganaron los demócratas. Nota: puede que te resulte útil separar los datos en dos datasets (votos republicanos y votos demócratas) y luego unirlos.
 
