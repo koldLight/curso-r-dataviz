@@ -344,7 +344,7 @@ pal_quantile <- colorQuantile(
 )
 
 map_quantile <- leaflet(data = tmp) %>%
-  addPolygons(color       = ~pal_bin(ratio_participacion),
+  addPolygons(color       = ~pal_quantile(ratio_participacion),
               label       = ~nombre,
               stroke      = FALSE,
               fillOpacity = 1
