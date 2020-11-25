@@ -357,8 +357,6 @@ Partiendo del ejemplo `examples/02_fibonacci_con_conductor`, añade un botón al
 
 Crea una aplicación de shiny para visualizar el porcentaje de voto a cada uno de los partidos en las últimas elecciones.
 
-Tienes disponible los datos en `dat/lineas_metro.geojson` y `dat/paradas_metro_madrid.geojson`.
-
 La aplicación tendrá:
 
 * Como inputs, el listado de partidos disponibles.
