@@ -1,0 +1,161 @@
+---
+title: "SMD - Visualización de datos - Webinar 3"
+author: "Luz Frias"
+date: "2020-11-05"
+output:
+  html_document:
+    highlight: tango
+    theme: flatly
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_knit$set(root.dir = "..")
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+```
+
+## Introducción
+
+Estas son las soluciones a los fastbooks 5 y 6. Algunas aclaraciones:
+
+* Este documento está con encoding UTF-8. Si lo abres desde windows, es posible que veas mal los caracteres especiales (tildes, eñes, ...). Lo puedes arreglar, en RStudio, haciendo click en File / Reopen with encoding y eligiendo UTF-8
+* Las rutas a los ficheros suponen que, en la misma carpeta en la que tienes este documento, está `dat/` con los archivos de datos necesarios. Si no te funciona, es que los tienes en otra parte y tendrás que modificar esas rutas.
+
+```{r, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(palmerpenguins)
+library(plotly)
+```
+
+## Fastbook 5 - Gráficos interactivos con plotly: nivel básico
+
+### Actividad 1
+
+Utilizando el dataset `diamonds`, representa la relación en un gráfico de puntos del precio frente a los quilates.
+
+```{r}
+diamonds_5k <- sample_n(diamonds, 5000)
+
+plot_ly(diamonds_5k, type = "scatter", mode = "markers",
+        x = ~carat, y = ~price)
+```
+
+### Actividad 2
+
+Con el dataset `penguins`:
+
+1. Pinta la relación entre longitud y profundidad del pico.
+
+2. Añade al gráfico del punto 1 la distinción entre especies mediante el color.
+
+3. Añade al gráfico del punto 1 la distinción entre el peso corporal mediante el color.
+
+```{r}
+plot_ly(penguins, type = "scatter", mode = "markers",
+        x = ~bill_length_mm, y = ~bill_depth_mm)
+```
+
+```{r}
+plot_ly(penguins, type = "scatter", mode = "markers",
+        x = ~bill_length_mm, y = ~bill_depth_mm, color = ~species)
+```
+
+```{r}
+plot_ly(penguins, type = "scatter", mode = "markers",
+        x = ~bill_length_mm, y = ~bill_depth_mm, color = ~body_mass_g)
+```
+
+### Actividad 3
+
+1. Lee los datos del economista (dat/economist.csv), con indicadores de desarrollo y corrupción por países:
+
+* HDI: Human Development Index (1: más desarrollado)
+* CPI: Corruption Perception Index (10: menos corrupto)
+
+2. Crea un gráfico que:
+
+* Cada país sea un punto
+* El eje x indique CPI, el y HDI
+* El color del punto indique la región
+* Su tamaño sea proporcional al ranking HDI
+
+```{r}
+economist <- read.csv("dat/economist.csv")
+
+plot_ly(economist, type = "scatter", mode = "markers",
+        x = ~CPI, y = ~HDI, size = ~HDI.Rank, color = ~Region, text = ~Country,
+        hovertemplate = "<b>%{text}</b><br>CPI: %{x}<br>HDI: %{y}")
+```
+
+### Actividad 4
+
+1. Lee los datos de los resultados de las elecciones presidenciales de los Estados Unidos (dat/usa_president.csv).
+
+2. Pinta en un gráfico de líneas la evolución del número de votos a lo largo de los años del partido republicado frente al demócrata.
+
+```{r}
+usa_president <- read.csv("dat/usa_president.csv")
+
+usa_elections <- usa_president %>%
+  filter(!writein, party %in% c("democrat", "republican")) %>%
+  group_by(year, party) %>%
+  summarise(candidatevotes = sum(candidatevotes)) %>%
+  ungroup()
+
+plot_ly(usa_elections, type = "scatter", mode = "lines",
+        x = ~year, y = ~candidatevotes, color = ~party)
+```
+
+
+## Fastbook 6 - Gráficos interactivos con plotly: nivel avanzado
+
+### Actividad 1
+
+Utilizando los datos del dataset de `penguins`, pinta un gráfico de puntos que muestre la relación entre longitud y profunidad del pico. Añade un selector (_dropdown_) que permita al usuario elegir si quiere ver los datos de los machos, las hembras o ambos.
+
+```{r}
+updatemenus <- list(
+      list(
+        buttons = list(
+          list(label = "Ambos",
+               method = "update",
+               args = list(
+                 list(visible = c(TRUE, TRUE))
+               )),
+          list(label = "Hembras",
+               method = "update",
+               args = list(
+                 list(visible = c(TRUE, FALSE))
+               )),
+          list(label = "Machos",
+               method = "update",
+               args = list(
+                 list(visible = c(FALSE, TRUE))
+               ))
+    )))
+
+penguins_f <- filter(penguins, sex == "female")
+penguins_m <- filter(penguins, sex == "male")
+
+plot_ly(penguins_f, type = "scatter", mode = "markers",
+        x = ~bill_length_mm, y = ~bill_depth_mm, color = I("purple"),
+        name = "Hembras") %>%
+  add_trace(data = penguins_m, color = I("orange"), name = "Machos") %>%
+  layout(updatemenus = updatemenus)
+```
+
+### Actividad 2
+
+Lee los datos de evolución de la población en España (dat/poblacion_espana.csv). Crea una animación que muestre un gráfico de líneas, donde el eje `x` muestra la edad de inicio del rango (edad_desde), y el eje `y` muestra la población en ese rango. Anima el gráfico para que vaya mostrando la evolución año a año.
+
+```{r}
+poblacion <- read.csv("dat/poblacion_espana.csv")
+
+plot_ly(poblacion, type = "scatter", mode = "lines",
+        x = ~edad_desde, y = ~poblacion, frame = ~anio, name = "Población") %>%
+  layout(title = "Evolución de la población española",
+         xaxis = list(title = "Rango edad"))
+```
+
+
