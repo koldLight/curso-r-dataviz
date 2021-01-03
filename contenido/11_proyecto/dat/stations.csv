@@ -1,0 +1,185 @@
+"station_id","name","total_bases","number","longitude","address","latitude"
+1,"Puerta del Sol A",24,"1a",-3.7024255,"Puerta del Sol nº 1",40.4168961
+2,"Puerta del Sol B",24,"1b",-3.7024207,"Puerta del Sol nº 1",40.4170009
+3,"Miguel Moya",24,"2",-3.7058415,"Calle Miguel Moya nº 1",40.4205886
+4,"Plaza Conde Suchil",18,"3",-3.7069171,"Plaza del Conde Suchil nº 2-4",40.4302937
+5,"Malasaña",24,"4",-3.7025875,"Calle Manuela Malasaña nº 5",40.4285524
+6,"Fuencarral",27,"5",-3.7020599,"Calle Fuencarral nº 108",40.428528
+7,"Colegio Arquitectos",24,"6",-3.698447,"Calle Hortaleza nº 63",40.424148
+8,"Hortaleza",21,"7",-3.6977715,"Calle Hortaleza nº 75",40.4251906
+9,"Alonso Martínez",24,"8",-3.6954403,"Plaza de Alonso Martínez nº 5",40.4278682
+10,"Plaza de San Miguel",24,"9",-3.7095084,"Plaza de San Miguel nº 9",40.4156057
+11,"Marqués de la Ensenada",24,"10",-3.6918807,"Calle Marqués de la Ensenada nº 16",40.4250863
+12,"San Andrés",24,"11",-3.7035918,"Calle San Andrés nº 18",40.4269483
+13,"San Hermenegildo",24,"12",-3.7061931,"Calle San Bernardo nº 85",40.4284246
+14,"Conde Duque",24,"13",-3.7104417,"Calle Conde Duque nº 22",40.4273264
+15,"Ventura Rodríguez",24,"14",-3.713479,"Calle Ventura Rodríguez nº 2",40.4260957
+16,"San Vicente Ferrer",21,"15",-3.7073764,"Calle San Vicente Ferrer nº 64",40.4261649
+17,"San Bernardo",21,"16",-3.7075065,"Calle San Bernardo nº 22",40.4230721
+18,"Carlos Cambronero",24,"17",-3.7038312,"Plaza de Carlos Cambronero nº 2",40.4232649
+19,"Plaza de Pedro Zerolo",24,"18",-3.6996502,"Plaza de Pedro Zerolo",40.4207773
+20,"Prim",24,"19",-3.6954983,"Calle Prim nº 2",40.4218616
+21,"Banco de España A",30,"20a",-3.6954615,"Calle Alcalá nº 49",40.4192342
+23,"Red de San Luis A",24,"21a",-3.7014814,"Calle Montera nº 48",40.4197872
+24,"Red de San Luis B",24,"21b",-3.7015235,"Calle Montera nº 47",40.4197204
+25,"Jacometrezo",24,"22",-3.7065376,"Calle Jacometrezo nº 3",40.4200783
+26,"Santo Domingo",24,"23",-3.7080733,"Plaza de Santo Domingo nº 1",40.4197429
+27,"Palacio de Oriente",24,"24",-3.710692,"Calle Carlos III nº 1",40.417908
+28,"Plaza de Celenque A",24,"25a",-3.7064809,"Plaza de Celenque nº 1",40.4173114
+29,"Plaza de Celenque B",24,"25b",-3.7063837,"Plaza de Celenque nº 1",40.4172781
+30,"Plaza de las Salesas",24,"26",-3.694475,"Plaza de las Salesas 7",40.423855
+31,"Huertas",24,"27",-3.6956178,"Calle Jesús nº 1",40.4132798
+32,"Sevilla",24,"28",-3.69926,"Calle Alcalá nº 27",40.4181663
+33,"Marqués de Cubas",24,"29",-3.6957355,"Calle del Marqués de Cubas nº 25",40.4162619
+34,"San Quintín",27,"30",-3.711504,"Calle Pavía nº 6",40.4192095
+35,"Calle Mayor",27,"31",-3.7068969,"Calle Mayor nº 20",40.4163638
+36,"Plaza de la Provincia",18,"32",-3.7061032,"Plaza de la Provincia nº 1",40.4150099
+37,"Carretas",24,"33",-3.7031808,"Calle Carretas nº 8",40.4157138
+38,"Jacinto Benavente",24,"34",-3.7036825,"Plaza de Jacinto Benavente",40.4146755
+39,"Plaza del Cordón",24,"35",-3.7103285,"Plaza del Cordón nº 1",40.4141931
+40,"Plaza de Ramales",24,"36",-3.7124038,"Plaza de Ramales nº 1",40.4167281
+41,"Plaza San Francisco",24,"37",-3.7144964,"Plaza de San Francisco nº 5",40.4108442
+42,"Plaza de los Carros",24,"38",-3.7120734,"Carrera de San Francisco nº 1",40.4110406
+43,"Plaza de la Cebada",27,"39",-3.7088337,"Plaza de la Cebada nº 16 ",40.4112744
+44,"Conde de Romanones",24,"40",-3.7049407,"Plaza del Conde de Romanones nº 9",40.4138846
+45,"Antón Martín",21,"41",-3.6991147,"Calle Atocha nº 54",40.4122047
+46,"Santa Isabel",24,"42",-3.6982318,"Calle Santa Isabel nº 32",40.4107085
+47,"Jesús y María",24,"43",-3.7025024,"Calle Lavapiés nº 34-36",40.4101564
+48,"Plaza de Nelson Mandela",21,"44",-3.7040666,"Calle Mesón de Paredes nº 35",40.4097617
+49,"Puerta de Toledo",21,"45",-3.7110513,"Glorieta de la Puerta de Toledo nº 1",40.4070358
+50,"Ribera de Curtidores",24,"46",-3.7071259,"Calle Ribera de Curtidores nº 28",40.4053153
+51,"Embajadores 1",24,"47",-3.7028265,"Glorieta de Embajadores nº 6",40.4047851
+52,"Embajadores 2",24,"48",-3.7022591,"Glorieta de Embajadores nº 2",40.4056107
+53,"Casa Encendida",24,"49",-3.6992759,"Ronda de Atocha nº 34",40.4060941
+54,"Museo Reina Sofía",24,"50",-3.6933463,"Calle Santa Isabel nº 57",40.4083684
+55,"Ronda de Atocha",27,"51",-3.6935205,"Ronda de Atocha nº 2",40.4075606
+56,"Plaza de Santa Ana",24,"52",-3.7007164,"Plaza de Santa Ana nº 10",40.4144226
+57,"Plaza de Lavapiés",24,"53",-3.7008803,"Calle Valencia nº 1",40.4089282
+58,"Barceló",21,"54",-3.700423,"Calle Barceló nº 7",40.4266828
+59,"Plaza de San Ildefonso",24,"55",-3.7020842,"Plaza de San Ildefonso nº 3",40.4239757
+60,"Plaza del Carmen ",24,"56",-3.7032414,"Plaza del Carmen nº 1",40.4184192
+61,"Santa Cruz del Marcenado",24,"57",-3.7126299,"Calle Santa Cruz del Marcenado nº 24",40.4295658
+62,"Augusto Figueroa",24,"58",-3.697895,"Calle Augusto Figueroa nº 33",40.4222862
+63,"Plaza de Juan Pujol",21,"59",-3.7043418,"Calle Espíritu Santo nº 30",40.4255495
+64,"Plaza de la Independencia",24,"60",-3.688398,"Plaza de la Independencia nº 6",40.419752
+65,"Narváez",24,"61",-3.6752045,"Calle O'Donnell nº 28",40.4213983
+66,"O'Donnell",24,"62",-3.6724968,"Calle O'Donnell nº 50",40.4213148
+67,"Ibiza",24,"63",-3.6708959,"Calle Ibiza nº 62",40.4179237
+69,"Antonio Maura",24,"65",-3.6904525,"Calle Antonio Maura nº 15",40.4165605
+71,"Almadén",24,"67",-3.693225,"Calle Almadén nº 28",40.4108472
+72,"Espalter",21,"68",-3.6912023,"Calle Espalter nº 1",40.4128372
+73,"Puerta del Ángel Caído",27,"69",-3.688822,"Avenida de Alfonso XII nº 54",40.409808
+74,"Puerta del Doce de Octubre",24,"70",-3.6779232,"Avenida de Menéndez Pelayo nº 63",40.4153053
+75,"Doce de Octubre",24,"71",-3.6738865,"Calle Doce de Octubre nº 28",40.4159569
+76,"Sainz de Baranda",24,"72",-3.6691838,"Calle Doctor Esquerdo nº 99",40.4157413
+77,"Plaza de los Astros",24,"73",-3.6689089,"Avenida de Nazaret nº 7",40.4114475
+78,"Puerta del Pacífico ",24,"74",-3.6766813,"Avenida de Menéndez Pelayo nº 73",40.4117627
+79,"Menéndez Pelayo",24,"75",-3.6784838,"Avenida de Menéndez Pelayo nº 90",40.4082805
+80,"Puerta de Mariano de Cavia",24,"76",-3.6750121,"Avenida del Mediterráneo nº 19",40.4076726
+81,"Conde de Casal",22,"77",-3.670422,"Plaza del Conde de Casal nº 8",40.40635
+82,"Pedro Bosch",24,"78",-3.6744804,"Calle Cerro de la Plata nº 2",40.4009101
+83,"Puerta de Granada",24,"79",-3.6803874,"Avenida de Menéndez Pelayo nº 38",40.4051451
+84,"Atocha A",24,"80a",-3.6902255,"Paseo de la Infanta Isabel nº 3",40.4075685
+85,"Atocha B",27,"80b",-3.6901234,"Paseo de la Infanta Isabel nº 3",40.4074902
+86,"Cuesta de Moyano",24,"81",-3.691987,"Plaza del Emperador Carlos V nº 11",40.409297
+87,"Niño Jesús",24,"82",-3.6697526,"Calle Doctor Esquerdo nº 161",40.4084556
+88,"Pío Baroja",24,"83",-3.6751105,"Calle Pío Baroja nº 10",40.4130243
+89,"Valderribas",24,"84",-3.6726019,"Calle Doctor Esquerdo nº 191",40.4032501
+90,"Puerta de Madrid",27,"85",-3.680008,"Avenida de Menéndez Pelayo nº 11",40.421501
+91,"Cibeles",21,"86",-3.6926217,"Paseo del Prado nº 1",40.4186148
+92,"Ayala",24,"87",-3.6832566,"Calle Ayala nº 44",40.427736
+93,"Embajada de Italia",24,"88",-3.6838303,"Calle Velázquez nº 75",40.4313576
+94,"Conde Peñalver",24,"89",-3.6752024,"Calle Ayala nº 102",40.4272582
+95,"General Pardiñas",30,"90",-3.6837876,"Calle Goya nº 18",40.4250361
+96,"Príncipe de Vergara",24,"91",-3.6787441,"Calle Hermosilla nº 70",40.426134
+97,"Claudio Coello",24,"92",-3.6865463,"Calle Claudio Coello nº 45",40.4262945
+98,"Plaza de Colón",24,"93",-3.6893698,"Calle Goya nº 1",40.4257046
+99,"Biblioteca Nacional",21,"94",-3.6909648,"Paseo de Recoletos nº 32-34",40.422699
+100,"Villanueva",24,"95",-3.6870548,"Calle Claudio Coello nº 109",40.4226584
+101,"Castelló",27,"96",-3.6821793,"Calle Alcalá nº 111",40.422064
+102,"Alcalá",27,"97",-3.6801307,"Avenida de Menéndez Pelayo nº 3",40.4226906
+103,"Plaza de Felipe II",24,"98",-3.6753567,"Plaza de Felipe II",40.4242625
+104,"Alcántara",24,"99",-3.6738714,"Calle Alcántara nº 2",40.4261851
+105,"Palacio de Deportes",24,"100",-3.6738635,"Calle Goya nº 99",40.4248457
+106,"Jorge Juan",24,"101",-3.6691523,"Calle Jorge Juan nº 131",40.4231526
+107,"Velázquez",24,"102",-3.6840229,"Calle Alcalá nº 95",40.4211802
+108,"Ortega y Gasset",24,"103",-3.6865654,"Calle Ortega y Gasset nº 6",40.4303057
+109,"Castellana",21,"104",-3.6895336,"Paseo de la Castellana nº 4",40.4268331
+110,"Serrano",24,"105",-3.6873922,"Calle Serrano nº 54",40.4267905
+111,"Colón A",18,"106a",-3.6877227,"Calle Serrano nº 34",40.4251002
+112,"Colón B",18,"106b",-3.687745,"Calle Serrano nº 34",40.424963
+113,"Columela",24,"107",-3.6884369,"Calle Serrano nº 6",40.4215246
+114,"Mártires Concepcionistas",27,"108",-3.6706024,"Calle Mártires Concepcionistas nº 2",40.4273005
+115,"Marqués de Salamanca",24,"109",-3.6816402,"Calle José Ortega y Gasset nº 30",40.4300481
+116,"Moncloa",24,"110",-3.7206893,"Paseo de Moret nº 2",40.4344969
+117,"Arcipreste de Hita A",24,"111a",-3.7175435,"Calle Arcipreste de Hita nº 12",40.4337322
+118,"Arcipreste de Hita B",24,"111b",-3.7175115,"Calle Arcipreste de Hita nº 12",40.4337036
+119,"Paseo de Moret",24,"112",-3.7246532,"Paseo de Moret nº 11",40.4325991
+120,"Pintor Rosales",24,"113",-3.7205129,"Paseo del Pintor Rosales nº 38",40.427657
+121,"Quintana",24,"114",-3.7174158,"Calle Quintana nº 11-13",40.4277456
+122,"Ferraz",24,"115",-3.7170448,"Calle Evaristo San Miguel nº 2",40.4253944
+123,"Plaza de España A",24,"116a",-3.711603,"Plaza de España",40.42402
+124,"Plaza de España B",24,"116b",-3.711703,"Plaza de España",40.42412
+125,"Altamirano",24,"117",-3.7188898,"Calle Altamirano nº 24",40.4309797
+126,"Juan Martín",24,"118",-3.6882407,"Calle Juan Martín el Empecinado nº 14",40.400781
+127,"Méndez Álvaro",24,"119",-3.6863218,"Calle Méndez Álvaro nº 11",40.4013216
+128,"Palos de la Frontera",24,"120",-3.6944768,"Calle Palos de la Frontera nº 40",40.4032208
+129,"Santa María de la Cabeza",24,"121",-3.6987665,"Paseo de Santa María de la Cabeza nº 58",40.4017926
+130,"Santa Engracia 14",24,"122",-3.6963983,"Calle Santa Engracia nº 14",40.4295863
+131,"Guzmán el Bueno",24,"123",-3.7133412,"Calle Guzmán el Bueno nº 2",40.4306458
+169,"Manuel Silvela",24,"124",-3.6993465,"Calle Manuel Silvela nº 20",40.4309524
+164,"General Martínez Campos ",24,"125",-3.6948626,"Calle Fernández de la Hoz nº 29",40.435285
+163,"General Álvarez de Castro",24,"126",-3.7015686,"Calle del General Álvarez de Castro nº 2",40.4344731
+168,"Fernando el Católico",24,"127",-3.708439,"Calle Fernando el Católico nº 19",40.4338516
+160,"Cea Bermúdez",27,"128",-3.7154329,"Calle Cea Bermúdez nº 59",40.438994
+161,"José Abascal",24,"129",-3.6982209,"Calle José Abascal nº 33",40.4385316
+157,"Santa Engracia 127",20,"130",-3.7016321,"Calle Santa Engracia nº 127",40.441386
+156,"Bravo Murillo 44",24,"131",-3.7039582,"Calle Bravo Murillo nº 44",40.4412115
+149,"Glorieta de los Cuatro Caminos",24,"132",-3.7036675,"Calle Santa Engracia nº 168",40.4463667
+150,"Raimundo Fernández",24,"133",-3.7001669,"Calle Raimundo Fernández Villaverde nº 33-35",40.447125
+153,"Agustín de Betancourt",24,"134",-3.6956047,"Calle María de Guzmán nº 58",40.4440297
+158,"Plaza de San Juan de la Cruz",24,"135",-3.6927821,"Plaza de San Juan de la Cruz nº 11",40.4415974
+151,"Castellana 106",24,"136",-3.690861,"Paseo de la Castellana nº 106",40.4453307
+152,"Plaza de la República Argentina",24,"137",-3.6853312,"Plaza de la República Argentina nº 6-7",40.445411
+154,"Paseo de la Castellana con Raimundo Fernández",24,"138",-3.6917932,"Paseo de la Castellana nº 67",40.4457414
+159,"José Gutiérrez Abascal ",24,"139",-3.6907784,"Calle José Gutiérrez Abascal nº 2",40.4396792
+162,"Velázquez 130",24,"140",-3.682862,"Calle Velázquez nº 130",40.4379444
+165,"Pº Castellana - Glorieta de Emilio Castelar",12,"141",-3.6892368,"Paseo de la Castellana nº 43",40.4355143
+167,"Castellana 42",24,"142",-3.6879154,"Paseo de la Castellana nº 42",40.4334087
+166,"Diego de León 52",24,"143",-3.678492,"Calle Diego de León nº 52",40.4345973
+170,"Juan Bravo 50",24,"144",-3.6758555,"Calle Juan Bravo nº 50",40.4323655
+171,"Ortega y Gasset 87",24,"145",-3.6712823,"Calle Ortega y Gasset nº 87",40.429887
+155,"María Francisca 1",18,"146",-3.6787169,"Calle María Francisca nº 1",40.4442258
+148,"Doctor Arce 45",24,"147",-3.6797296,"Avenida del Doctor Arce nº 45",40.4483269
+144,"Serrano 210",24,"148",-3.6817962,"Calle Serrano nº 210",40.4510188
+146,"Paseo de la Habana 42",24,"149",-3.6881689,"Paseo de la Habana nº 42",40.4498613
+147,"Castellana frente a Hermanos Pinzón",24,"150",-3.6905604,"Paseo de la Castellana nº 124",40.4488924
+145,"Orense 12",24,"151",-3.695286,"Calle Orense nº 12",40.4480662
+142,"General Perón 1",24,"152",-3.6990077,"Avenida del General Perón nº 1-4",40.4527164
+143,"General Perón con Poeta Joan Maragall",24,"153",-3.692651,"Avenida del General Perón nº 36",40.4522938
+141,"Orense 36",24,"154",-3.6946218,"Calle Orense nº 36",40.4548456
+139,"San Germán",24,"155",-3.7009675,"Calle del General Yagüe nº 57",40.4572824
+140,"Sor Ángela de la Cruz",24,"156",-3.691533,"Calle Sor Ángela de la Cruz nº 2",40.4592351
+137,"Castellana 164",24,"157",-3.6894151,"Paseo de la Castellana nº 164",40.4591366
+138,"Alberto Alcocer",24,"158",-3.684715,"Avenida de Alberto Alcocer nº 22",40.4585318
+173,"Paseo de la Habana 63",24,"159",-3.6835926,"Paseo de la Habana nº 63",40.4543852
+172,"Colombia",24,"160",-3.6763439,"Calle Colombia nº 7",40.4572466
+132,"Paseo de la Florida",27,"161",-3.7218482,"Paseo de la Florida nº 8",40.4220812
+133,"Metro Pirámides",24,"162",-3.7108108,"Paseo de los Olmos nº 28",40.4034076
+134,"Paseo de la Esperanza",21,"163",-3.7064516,"Paseo de la Esperanza nº 2",40.4035988
+136,"Paseo de las Delicias",24,"164",-3.6945025,"Paseo de las Delicias nº 92-94",40.3972616
+135,"Entrada Matadero",27,"165",-3.6971829,"Paseo de la Chopera nº 14",40.3919385
+174,"Segovia 26",24,"166",-3.7135833,"Calle Segovia, 26",40.4138333
+175,"Segovia 45",24,"167",-3.717487,"Calle Segovia, 45",40.413736
+190,"Parque Roma",24,"182",-3.6657777,"Sainz de Baranda, frente al nº 107",40.4186666
+211,"San Francisco de Sales",24,"203",-3.7144722,"General Ampudia, 2",40.44175
+189,"Retiro-Ibiza",27,"181",-3.6766111,"Ibiza, 18",40.41825
+184,"Beata",27,"176",-3.6937222,"Alicante, 3",40.39425
+200,"Avenida de los Toreros",27,"192",-3.6714166,"Avda. Toreros,3",40.4318611
+185,"Legazpi",24,"177",-3.6941944,"Bolivar, 3",40.3914722
+201,"Ventas",27,"193",-3.6655555,"Avda. Toreros, 49",40.4324722
+213,"Estrecho",27,"205",-3.7032777,"Navarra, 1",40.4535
+207,"Fernando el Católico",27,"199",-3.7149166,"Fernando el Católico, 61",40.4343611
+183,"Jaime el Conquistador",21,"175",-3.6983055,"Jaime I el Conquistador, 30",40.3962222
+179,"Embajadores-Cáceres",24,"171",-3.6983888,"Embajadores, 101",40.39975
+191,"Doctor Esquerdo-Hermosilla",24,"183",-3.669339,"Hermosilla, 135",40.425635
