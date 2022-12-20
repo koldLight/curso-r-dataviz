@@ -1,12 +1,12 @@
 # Curso de visualización de datos en R
 
-## 1. Presentación del curso
+## Presentación del curso
 
 La visualización es una parte esencial de cualquier proyecto de datos. Nos ayuda a comprender la estructura de nuestro dataset y a detectar patrones y outliers.
 
 El objetivo de esta asignatura es conocer en líneas generales la teoría de la visualización y utilizar las herramientas que nos provee R. Exploraremos herramientas como ggplot para el diseño de gráficos estáticos, leaflet para datos espaciales y shiny para montar cuadros de mando interactivos.
 
-## 2. Índice
+## Índice
 
 ### Tema 1. Gráficos estáticos con ggplot: nivel básico
 
@@ -86,3 +86,15 @@ Además, nos resultará muy útil tener a mano las siguientes "chuletas" de uso 
 * [rmarkdown](https://posit.co/wp-content/uploads/2022/10/rmarkdown-1.pdf)
 * [shiny](https://posit.co/wp-content/uploads/2022/10/shiny-1.pdf)
 
+## Contribuye
+
+Si ves algo incorrecto, que no se entiende bien, crees que falta alguna explicación o tienes alguna idea que compartir, puedes crear una `issue` en el repositorio.
+
+## Licencia
+
+[![](http://i.creativecommons.org/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/)
+
+Puedes utilizar libremente este material, con las siguientes condiciones:
+
+* Atribuir la autoría a este repositorio.
+* Si lo utilizas y haces cambios, deberás liberarlo también bajo la misma licencia.
