@@ -57,10 +57,13 @@ book:
     creator: "@koldLight"
   open-graph:
     locale: es_ES
-
+  google-analytics:
+    tracking-id: "G-PP4E1G1J71"
+    anonymize-ip: true
+    version: 4
 
 comments:
-  hypothesis: true
+  hypothesis: false
 
 format:
   html:

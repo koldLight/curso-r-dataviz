@@ -8,24 +8,34 @@ execute:
 
 ## Presentación {.unnumbered}
 
-La visualización es una parte esencial de cualquier proyecto de datos. Nos ayuda a comprender la estructura de nuestro dataset y a detectar patrones y outliers.
+La visualización es una parte esencial de cualquier proyecto de datos. Nos ayuda a comprender la estructura de nuestro
+dataset y a detectar patrones y outliers.
 
-El objetivo de este curso es conocer en líneas generales la teoría de la visualización y utilizar las herramientas que nos provee R. Exploraremos herramientas como ggplot para el diseño de gráficos estáticos, leaflet para datos espaciales y shiny para montar cuadros de mando interactivos.
+El objetivo de este curso es conocer en líneas generales la teoría de la visualización y utilizar las herramientas
+que nos provee R. Exploraremos herramientas como ggplot para el diseño de gráficos estáticos, leaflet para datos
+espaciales y shiny para montar cuadros de mando interactivos.
 
 
 ### Seguir el material
 
-Este curso está disponible en GitHub, en [koldLight/curso-r-dataviz](https://github.com/koldLight/curso-r-dataviz). Para seguirlo, lo más recomendable es que te descargues el repositorio completo y sitúes el workspace de R en él. Así te funcionarán bien tanto los notebooks de quarto, como las rutas relativas para leer ficheros de datos en `dat/`.
+Este curso está disponible en GitHub, en [koldLight/curso-r-dataviz](https://github.com/koldLight/curso-r-dataviz). Para
+seguirlo, lo más recomendable es que te descargues el repositorio completo y sitúes el workspace de R en él. Así te
+funcionarán bien tanto los notebooks de quarto, como las rutas relativas para leer ficheros de datos en `dat/`.
 
-Todos los documentos usan el encoding UTF-8. Si lo abres desde windows, es posible que veas mal los caracteres especiales (tildes, eñes, ...). Lo puedes arreglar, en RStudio, haciendo click en File / Reopen with encoding y eligiendo UTF-8.
+Todos los documentos usan el encoding UTF-8. Si lo abres desde windows, es posible que veas mal los caracteres
+especiales (tildes, eñes, ...). Lo puedes arreglar, en RStudio, haciendo click en File / Reopen with encoding y
+eligiendo UTF-8.
 
-Las rutas a los ficheros suponen que, en la misma carpeta en la que tienes este documento, está `dat/` con los archivos de datos necesarios. Si no te funciona, es que los tienes en otra parte y tendrás que modificar esas rutas.
+Las rutas a los ficheros suponen que, en la misma carpeta en la que tienes este documento, está `dat/` con los archivos
+de datos necesarios. Si no te funciona, es que los tienes en otra parte y tendrás que modificar esas rutas.
 
 ### Requisitos
 
-Para seguir este curso, es necesario contar con los siguientes paquetes de R instalados: ggplot2, rjson, leaflet, scales, dplyr, plotly, rmarkdown, flexdashboard y shiny.
+Para seguir este curso, es necesario contar con los siguientes paquetes de R instalados: ggplot2, rjson, leaflet,
+scales, dplyr, plotly, rmarkdown, flexdashboard y shiny.
 
-El curso presupone que sabes manipular datos utilizando dplyr. Si no, puedes seguir este [tutorial](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html) antes.
+El curso presupone que sabes manipular datos utilizando dplyr. Si no, puedes seguir este
+[tutorial](https://cran.r-project.org/web/packages/dplyr/vignettes/dplyr.html) antes.
 
 Además, nos resultará muy útil tener a mano las siguientes "chuletas" de uso de las herramientas que vamos a utilizar:
 
@@ -38,4 +48,8 @@ Además, nos resultará muy útil tener a mano las siguientes "chuletas" de uso 
 
 ### Sobre mi
 
-Soy Luz Frias, apasionada de la tecnología desde que destripé mi primer ordenador de pequeñaja. Actualmente soy ingeniera informática freelance y me dedico a hacer proyectos de software. Mi especialidad, aquellos con alta complejidad, en los que encaja mejor un equipo pequeño con perfiles end-to-end que un gran equipo de expertos en herramientas concretas. Puedes saber un poco más sobre mi [aquí](https://luzfrias.notion.site/luzfrias/Luz-Frias-ES-2efe28d1f6454d39b8f29a352fdee6d1). Si crees que mi equipo y yo podemos encajar en un proyecto de tu empresa, puedes contactarme en `luzfrias arroba circiter punto es`.
+Soy Luz Frias, apasionada de la tecnología y los datos. Actualmente soy ingeniera informática freelance y me dedico a
+hacer proyectos de software. Mi especialidad, aquellos con alta complejidad, en los que encaja mejor un equipo pequeño
+con perfiles end-to-end que un gran equipo de expertos en herramientas concretas. Puedes saber un poco más sobre
+mi [aquí](https://luzfrias.notion.site/luzfrias/Luz-Frias-ES-2efe28d1f6454d39b8f29a352fdee6d1). Si crees que mi equipo
+y yo podemos encajar en un proyecto de tu empresa, puedes contactarme en `luzfrias arroba circiter punto es`.
