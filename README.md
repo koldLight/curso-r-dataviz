@@ -76,12 +76,13 @@ El objetivo de esta asignatura es conocer en líneas generales la teoría de la 
 
 ## 3. Material audiovisual y complementario
 
-Para el desarrollo de la asignatura es necesario contar con los siguientes paquetes de R instalados: ggplot2, scales, rjson, leaflet, dplyr, plotly, rmarkdown, flexdashboard y shiny.
+Para seguir este curso, es necesario contar con los siguientes paquetes de R instalados: ggplot2, scales, rjson, leaflet, dplyr, plotly, rmarkdown, flexdashboard y shiny.
 
-Además, nos resultará muy útil tener a mano las siguientes _chuletas_ de uso de las herramientas que vamos a utilizar:
+Además, nos resultará muy útil tener a mano las siguientes "chuletas" de uso de las herramientas que vamos a utilizar:
 
-* ggplot2: https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf
-* leaflet: https://github.com/rstudio/cheatsheets/raw/master/leaflet.pdf
-* plotly: https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf
-* rmarkdown: https://github.com/rstudio/cheatsheets/raw/master/rmarkdown-2.0.pdf
-* shiny: https://github.com/rstudio/cheatsheets/raw/master/shiny.pdf
+* [ggplot2](https://posit.co/wp-content/uploads/2022/10/data-visualization-1.pdf)
+* [leaflet](https://posit.co/wp-content/uploads/2022/10/leaflet.pdf)
+* [plotly](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf)
+* [rmarkdown](https://posit.co/wp-content/uploads/2022/10/rmarkdown-1.pdf)
+* [shiny](https://posit.co/wp-content/uploads/2022/10/shiny-1.pdf)
+

@@ -48,3 +48,11 @@ po/*~
 *.zip
 gestion/
 *.html
+temp/
+webinars/
+contenido/
+
+/.quarto/
+_book/
+*_files/
+site_libs/
