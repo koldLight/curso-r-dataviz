@@ -46,6 +46,17 @@ Además, nos resultará muy útil tener a mano las siguientes "chuletas" de uso 
 * [shiny](https://posit.co/wp-content/uploads/2022/10/shiny-1.pdf)
 
 
+### Licencia
+
+[![](http://i.creativecommons.org/l/by-sa/4.0/88x31.png)](http://creativecommons.org/licenses/by-sa/4.0/)
+
+Puedes utilizar libremente este material, con las siguientes condiciones:
+
+* Atribuir la autoría correctamente, indicando autor y repositorio de GitHub [koldLight/curso-r-dataviz](https://github.com/koldLight/curso-r-dataviz).
+* Si lo utilizas y haces cambios, deberás liberarlo también bajo la misma licencia, y citando la fuente original.
+
+El detalle sobre la licencia está en el [GitHub](https://github.com/koldLight/curso-r-dataviz).
+
 ### Sobre mi
 
 Soy Luz Frias, apasionada de la tecnología y los datos. Actualmente soy ingeniera informática freelance y me dedico a
