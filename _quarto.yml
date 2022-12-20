@@ -1,0 +1,68 @@
+project:
+  type: book
+  render:
+    - "*.qmd"
+    - "!webinars/"
+
+number-sections: false
+
+book:
+  title: "R para visualización de datos"
+  author: "Luz Frias"
+  date: "2022-12-15"
+  site-url: https://rdataviz.luzfrias.com
+  description: Curso abierto, gratuito y en español. Recorre las principales
+    herramientas de visualización de generación de gráficos, mapas, informes y
+    cuadros de mando en R
+  sidebar:
+    style: docked
+    background: light
+  chapters:
+    - index.qmd
+    - part: "Gráficos estáticos - ggplot"
+      chapters: 
+        - 01_ggplot_basico.qmd
+        - 01_ggplot_basico_soluciones.qmd
+        - 02_ggplot_intermedio.qmd
+        - 02_ggplot_intermedio_soluciones.qmd
+        - 03_ggplot_avanzado.qmd
+        - 03_ggplot_avanzado_soluciones.qmd
+    - part: "Mapas interactivos - leaflet"
+      chapters:
+        - 04_leaflet.qmd
+        - 04_leaflet_soluciones.qmd
+    - part: "Gráficos interactivos - plotly"
+      chapters:
+        - 05_plotly_basico.qmd
+        - 05_plotly_basico_soluciones.qmd
+        - 06_plotly_avanzado.qmd
+        - 06_plotly_avanzado_soluciones.qmd
+    - part: "Documentos - RMarkdown"
+      chapters:
+        - 07_rmarkdown.qmd
+    - part: "Cuadros de mando - flexdashboard"
+      chapters:
+        - 08_flexdashboard.qmd
+        - 08_flexdashboard_soluciones.qmd
+    - part: "Aplicaciones web - Shiny"
+      chapters:
+        - 09_shiny_basico.qmd
+        - 09_shiny_basico_soluciones.qmd
+        - 10_shiny_avanzado.qmd
+        - 10_shiny_avanzado_soluciones.qmd
+  page-navigation: true
+  search: true
+  repo-url: https://github.com/koldLight/curso-r-dataviz/
+  twitter-card:
+    creator: "@koldLight"
+  open-graph:
+    locale: es_ES
+
+
+comments:
+  hypothesis: true
+
+format:
+  html:
+    theme: pulse
+

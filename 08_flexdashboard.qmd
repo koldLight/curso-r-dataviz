@@ -1,0 +1,621 @@
+---
+title: "8 - Flexdashboard"
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+output:
+  html_document:
+    highlight: null
+---
+
+## ¿Qué vamos a hacer?
+
+En el capítulo anterior aprendimos a crear nuestros primeros documentos con _R Markdown_. En este, vamos a profundizar en el uso de _flexdashboard_, un cuadro de mando interactivo generado mediante _R Markdown_. Gracias a ello, son simples de crear, y soportan múltiples componentes interactivos, como gráficos de _plotly_ y mapas de _leaflet_.
+
+Antes de seguir, visita la [Galería de flexdashboard de RStudio](https://rmarkdown.rstudio.com/flexdashboard/examples.html) y mira los ejemplos de cuadros de mando.
+
+Para seguir correctamente este capítulo, deberás tener instaladas las librerías `flexdashboard` y `DT`.
+
+```{r, eval=FALSE}
+# Ejecuta las siguientes líneas en el caso de que no las tengas instaladas
+install.packages("flexdashboard")
+install.packages("DT")
+```
+
+## Layouts
+
+El _layout_ es la distribución que siguen los componentes en el cuadro de mando. Podemos configurar:
+
+* Si la orientación de las secciones es por columnas o por filas.
+* Cómo se ocupa el espacio vertical: si los componentes se deben ajustar a él y rellenarlo, o si permitiremos hacer scroll hacia abajo.
+* Si todos los elementos deben ser visibles, o si configuramos pestañas para un conjunto de ellos.
+* Su tamaño relativo.
+* Su distribución en diferentes páginas.
+
+### Orientación
+
+Tenemos dos opciones para distribuir las secciones del cuadro de mando: por columnas (opción por defecto) o por filas. Cada sección la dividimos por guiones (`-------------`).
+
+Para distribuir las secciones por columnas, especificamos `orientation: columns`. Si incluimos varios elementos en una misma columna, aparecerán uno debajo del otro.
+
+````markdown
+---
+title: "Ejemplo orientación por columnas"
+output:
+  flexdashboard::flex_dashboard:
+    orientation: columns
+---
+    
+Mi columna 1
+-------------------------------------
+    
+### Gráfica 1
+    
+`r ''````{r}
+```
+   
+Mi columna 2
+-------------------------------------
+   
+### Gráfica 2
+
+`r ''````{r}
+```   
+ 
+### Gráfica 3
+    
+`r ''````{r}
+```
+
+````
+
+![](resources/08_flexdashboard/layout_columnas.png)
+
+La otra opción es orientar las secciones mediante filas, especificando `orientation: rows`. Como por ejemplo este _layout_:
+
+````markdown
+---
+title: "Ejemplo orientación por filas"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+    
+Mi fila 1
+-------------------------------------
+    
+### Gráfica 1
+    
+`r ''````{r}
+```
+   
+Mi fila 2
+-------------------------------------
+    
+### Gráfica 2
+    
+`r ''````{r}
+```
+    
+### Gráfica 3
+
+`r ''````{r}
+```
+
+````
+
+![](resources/08_flexdashboard/layout_filas.png)
+
+### Scroll vertical
+
+Por defecto, a los elementos dentro de _flexdashboard_ se les establece una altura automática para rellenar el espacio disponible en el explorador. Este comportamiento está bien si tenemos pocos elementos. Pero si tenemos un gran número de gráficas, quedará mejor si permitimos hacer scroll para visualizarlos. Esto se puede controlar con la opción `vertical_layout`, que admite los valores `fill` (rellenar, sin scroll) y `scroll`.
+
+Por ejemplo:
+
+````markdown
+---
+title: "Ejemplo orientación por filas"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: scroll
+---
+    
+Mi fila 1
+-------------------------------------
+    
+### Gráfica 1
+    
+`r ''````{r}
+```
+   
+Mi fila 2
+-------------------------------------
+    
+### Gráfica 2
+    
+`r ''````{r}
+```
+    
+### Gráfica 3
+
+`r ''````{r}
+```
+
+````
+
+### Pestañas
+
+A veces, nos encontraremos ante elementos de diferentes niveles de importancia: gráficas y tablas principales, que son de interés general; y otros elementos que amplían información, o de menor importancia. Puede ser conveniente situar este conjunto de elementos de menor importancia en pestañas, y que el usuario decida si quiere ver o no.
+
+Para distribuir en pestañas los elementos de una fila o columna, añadimos la clase `{.tabset}` a su cabecera. Por ejemplo:
+
+````markdown
+---
+title: "Ejemplo con pestañas"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+    
+Mi fila 1
+-------------------------------------
+    
+### Gráfica 1
+    
+`r ''````{r}
+```
+   
+Mi fila 2 {.tabset}
+-------------------------------------
+    
+### Gráfica 2
+    
+`r ''````{r}
+```
+    
+### Gráfica 3
+
+`r ''````{r}
+```
+
+````
+
+![](resources/08_flexdashboard/layout_pestanas.png)
+
+### Tamaño
+
+Por defecto, _flexdashboard_ determina el tamaño de los elementos automáticamente dependiendo del espacio que ocupen y del disponible en el explorador donde se visualice. Además, la altura depende de si hemos especificado que debe haber scroll o no.
+
+Podemos modificar el tamaño por defecto utilizando las clases `data-width` y `data-height` a filas, columnas o gráficas. El número especificado marca el tamaño relativo a repartir entre los distintos componentes.
+
+````markdown
+---
+title: "Ejemplo sobrescribiendo el tamaño"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+    
+Mi fila 1 {data-height=150}
+-------------------------------------
+    
+### Gráfica 1
+    
+`r ''````{r}
+```
+   
+Mi fila 2 {data-height=50}
+-------------------------------------
+    
+### Gráfica 2
+    
+`r ''````{r}
+```
+    
+### Gráfica 3
+
+`r ''````{r}
+```
+
+````
+
+![](resources/08_flexdashboard/layout_tamano.png)
+
+### Varias páginas
+
+En cuadros de mando con gran cantidad de elementos, es útil hacer secciones y dividirlas en páginas. Para separar las páginas, utilizaremos `===============`. Cada nueva página creará una entrada en la barra de navegación del menú superior.
+
+Este ejemplo genera un cuadro de mando con dos páginas:
+
+
+````markdown
+---
+title: "Ejemplo con dos páginas"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+Página 1
+=====================================
+
+Mi fila 1
+-------------------------------------
+
+### Gráfica 1
+    
+`r ''````{r}
+```
+   
+### Gráfica 2
+    
+`r ''````{r}
+```
+
+Página 2
+=====================================
+
+Mi fila 2
+-------------------------------------
+
+### Gráfica 3
+    
+`r ''````{r}
+```
+   
+### Gráfica 4
+    
+`r ''````{r}
+```
+
+````
+
+![](resources/08_flexdashboard/varias_paginas.png)
+
+Por defecto, cada página genera una entrada en el menú de navegación. En el caso de que tengas muchas páginas, puede que te resulte útil organizarlas en menús que se expanden / colapsan al pulsar sobre ellos.
+
+Para agrupar varias páginas por debajo de un mismo _dropdown_, utilizaremos el atributo `data-navmenu`.
+
+El siguiente ejemplo tiene una página en el nivel principal, y dos agrupadas dentro de _Mi menú_.
+
+````markdown
+---
+title: "Ejemplo con páginas en menús"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+Página 1
+=====================================
+
+Página 2 {data-navmenu="Mi menu"}
+=====================================
+
+Página 3 {data-navmenu="Mi menu"}
+=====================================
+
+````
+
+![](resources/08_flexdashboard/varias_paginas_menu.png)
+
+## Componentes
+
+### Gráficas y mapas
+
+_flexdashboard_ permite añadir gráficas y mapas estáticos o interactivos. Es decir, de las herramientas que conocemos, podemos utilizar tanto _ggplot2_ (estáticos), como _leaflet_ y _plotly_ (interactivos). Pero, para aprovechar las posibilidades que nos da un cuadro de mando en HTML, es más recomendable utilizar componentes de tipo interactivo.
+
+El siguiente ejemplo genera un cuadro de mando con:
+
+* Un mapa con la participación por provincia.
+* Un gráfico de barras con el número de votos obtenido por partido.
+
+````markdown
+---
+title: "Elecciones en España"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+---
+
+Participación
+----------------------------
+
+### Participación
+
+`r ''````{r}
+library(leaflet)
+library(sf)
+library(dplyr)
+
+# Leemos los polígonos de un geojson que contiene las provincias españolas simplificadas
+provincias <- read_sf("dat/spain_provinces.geojson")
+
+# Leemos elecciones_2019_votos.csv con el número de votos por provincia y partido
+elecciones <- read.csv("dat/elecciones_2019_provincias.csv")
+
+# Calculamos el ratio de participación
+participacion <- elecciones %>%
+  mutate(ratio_participacion = round((votos_validos + votos_nulos) / censo_electoral, 3)) %>%
+  select(ccaa_nombre, provincia_cod_ine, ratio_participacion)
+
+# Añadimos al mapa el ratio de participación
+tmp <- provincias %>%
+  inner_join(participacion, by = c("codigo" = "provincia_cod_ine"))
+
+# Definimos una paleta por bins
+pal_bin <- colorBin(
+  palette = "Blues",
+  domain  = tmp$ratio_participacion,
+  bins    = 4
+)
+
+# Dibujamos el mapa
+leaflet(data = tmp) %>%
+  addPolygons(color       = ~pal_bin(ratio_participacion),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1
+  ) %>%
+  addLegend(
+    position = "bottomright",
+    pal      = pal_bin,
+    values   = ~ratio_participacion,
+    title    = "Ratio de participación",
+    labFormat = labelFormat(suffix = "%", transform = function(x) 100 * x),
+  )
+```
+
+Votos
+----------------------------
+
+### Votos
+
+`r ''````{r}
+library(plotly)
+
+# Leemos los datos de votos
+votos <- read.csv("dat/elecciones_2019_votos.csv")
+
+# Agrupamos por partido para obtener la cantidad total de votos
+votos_total <- votos %>%
+  group_by(partido) %>%
+  summarise(votos = sum(votos)) %>%
+  arrange(votos)
+
+# Convertimos el partido a un factor con orden, para que muestre las barras de
+# mayor a menor número de votos
+votos_total$partido <- factor(votos_total$partido, levels = unique(votos_total$partido))
+
+plot_ly(votos_total, y = ~partido, x = ~votos, type = "bar", orientation = "h")
+```
+
+````
+
+![](resources/08_flexdashboard/elementos_html.png)
+
+### Cajas de valores
+
+Las cajas de valores son elementos que se usan para destacar un número reducido de indicadores simples. En _flexdashboard_ se añaden con la función `valueBox` junto con un título y, opcionalmente, un icono y color personalizados.
+
+Sobre el cuadro de mando anterior, vamos a generar como ejemplo unos indicadores globales de participación, votos en blanco y nulos.
+
+````markdown
+---
+title: "Elecciones en España"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+---
+
+Indicadores
+----------------------------
+
+### Participación
+
+`r ''````{r}
+library(leaflet)
+library(sf)
+library(dplyr)
+library(flexdashboard)
+
+# Leemos elecciones_2019_votos.csv con el número de votos por provincia y partido
+elecciones <- read.csv("dat/elecciones_2019_provincias.csv")
+
+# Agrupamos para obtener los indicadores globales
+global <- elecciones %>%
+  summarise(censo_electoral  = sum(censo_electoral),
+            votos_validos    = sum(votos_validos),
+            votos_blanco     = sum(votos_blanco),
+            votos_nulos      = sum(votos_nulos)) %>%
+  mutate(ratio_participacion = round((votos_validos + votos_nulos) / censo_electoral, 2))
+
+valueBox(paste(global$ratio_participacion * 100, "%"), icon = "fa-users")
+```
+
+### Votos válidos
+
+`r ''````{r}
+valueBox(global$votos_validos, icon = "fa-check", color = "success")
+```
+
+### Votos en blanco
+
+`r ''````{r}
+valueBox(global$votos_blanco)
+```
+
+### Votos nulos
+
+`r ''````{r}
+valueBox(global$votos_nulos, icon = "fa-times", color = "warning")
+```
+
+````
+
+![](resources/08_flexdashboard/value_box.png)
+
+Sobre los iconos, hay tres conjuntos que podemos utilizar:
+
+* [Font Awesome](https://fontawesome.com/icons?from=io): p.e. `fa-flask`.
+* [Ionicons](https://ionicons.com/): p.e. `ion-checkmark`.
+* [Bootstrap Glyphicons](https://icons.getbootstrap.com/icons/): p.e. `glyphicon-time`.
+
+### Tablas
+
+Podemos incluir tablas de dos formas:
+
+* Con tablas simples
+* Con _DataTable_, que incluye funcionalidades como ordenación, filtro y paginación.
+
+```{r}
+library(dplyr)
+library(sf)
+
+# Leemos las provincias del geojson, aunque solo la vamos a utilizar para rescatar los nombres
+# Como las provincias tienen varios polígonos, eliminamos los duplicados que se forman
+provincias <- read_sf("dat/spain_provinces.geojson") %>%
+  select(codigo, nombre) %>%
+  filter(!duplicated(codigo))
+
+# Leemos los datos de votos
+votos <- read.csv("dat/elecciones_2019_votos.csv") %>%
+  inner_join(provincias, by = c("provincia_cod_ine" = "codigo")) %>%
+  arrange(provincia_cod_ine, desc(votos)) %>%
+  select(provincia = nombre, partido, votos)
+
+# Agrupamos por partido para obtener la cantidad total de votos
+votos_total <- votos %>%
+  group_by(partido) %>%
+  summarise(votos = sum(votos)) %>%
+  arrange(desc(votos))
+```
+
+Para pintar una tabla sencilla, sin interactividad, utilizamos `knitr::kable()`.
+
+```{r}
+knitr::kable(votos_total)
+```
+
+Para utilizar tablas más completas usaremos las de _DataTable_ (librería `DT`). Por ejemplo:
+
+```{r}
+library(DT)
+
+datatable(votos)
+```
+
+Las _DataTable_ tienen muchas opciones de personalización para:
+
+* Modificar su apariencia.
+* Personalizar el filtrado.
+* Ajustar el funcionamiento de la paginación.
+* Ajustar la ordenación.
+* Y más.
+
+Por ejemplo, veamos una tabla un poco más personalizada, con:
+
+* Estilo con bordes de celda
+* Sin nombres de fila
+* Con una descripción de la tabla
+* Tamaño de página ajustado a 20 elementos
+
+```{r}
+datatable(votos,
+          class = "cell-border stripe",
+          rownames = FALSE,
+          caption = "Detalle del número de votos por provincia y partido",
+          filter = "top",
+          options = list(
+            pageLength = 20
+          )
+)
+```
+
+> Consulta todas las opciones disponibles de _DataTables_ en [su documentación](https://rstudio.github.io/DT/) o en la ayuda de la función `?datatable`.
+
+## Personalización avanzada
+
+_flexdashboard_ cuenta con los siguientes temas, que modifican la apariencia por defecto del cuadro de mando: cosmo (que es lo mismo que default, al ser el tema por defecto), bootstrap, cerulean, journal, flatly, readable, spacelab, united, lumen, paper, sandstone, simplex y yeti. Para cambiarlo, usaremos la opción `theme`, como en el siguiente ejemplo:
+
+```
+---
+title: "Elecciones en España"
+output: 
+  flexdashboard::flex_dashboard:
+    theme: flatly
+---
+```
+
+Y si necesitamos aún un estilo más personalizado, podemos incluir nuestro propio _css_. Aunque esto ya es una funcionalidad bastante avanzada, ya que nos exige conocer este lenguaje, o que una persona del equipo nos lo proporcione: 
+
+```
+---
+title: "Elecciones en España"
+output: 
+  flexdashboard::flex_dashboard:
+    css: mis_estilos.css
+---
+```
+
+También podemos incluir opcionalmente un logo, que saldrá arriba a la izquierda, en la barra de navegación. Y un favicon, que es el icono pequeño que se asocia con la web.
+
+```
+---
+title: "Elecciones en España"
+output: 
+  flexdashboard::flex_dashboard:
+    logo: logo_de_mi_empresa.png
+    favicon: favicon_de_mi_empresa.png
+---
+```
+
+_Nota:_ tendremos que ajustar el tamaño del logo a nuestro tema, para que no sea demasiado grande ni pequeño, ya que _flexdashboard_ no lo escala para que encaje.
+
+## Profundiza
+
+Para saber más sobre los conceptos que hemos visto, puedes consultar alguna de estas referencias:
+
+* [Referencia de flexdashboard](https://rmarkdown.rstudio.com/flexdashboard/index.html): Documentación oficial de _RStudio_ para _flexdashboard_.
+* [Sección de flexdashboard en R Markdown](https://bookdown.org/yihui/rmarkdown/dashboards.html): sección dedicada al uso de _flexdashboard_.
+* [Galeria](https://rmarkdown.rstudio.com/flexdashboard/examples.html): ejemplos con código y resultado de varios cuadros de mando hechos con _flexdashboard_.
+
+## Conclusiones
+
+Nos podemos quedar con las siguientes ideas como resumen de este tema:
+
+* _flexdashboard_ nos permite diseñar cuadros de mando interactivos fácilmente.
+* Los layouts se pueden organizar por filas o columnas, y permitir scroll o no.
+* Si tenemos muchas gráficas, las distribuiremos utilizando pestañas, páginas o ambas.
+* Es recomendable utilizar elementos interactivos, y no estáticos.
+* Podemos usar _DataTables_ (libreria `DT`) para incluir tablas con funcionalidades como paginación, ordenación y filtro.
+
+## Actividades
+
+### Actividad 1
+
+Crea un cuadro de mando con flexdashboard con tres gráficas de tu elección de algún _dataset_ visto en los capítulos anteriores. A partir de él, genera las siguientes versiones:
+
+* Una columna con una gráfica, la otra con dos. Sin scroll vertical.
+* Tres filas, cada una con una gráfica. Con scroll vertical.
+* Una fila con una gráfica, la otra con dos. Sin scroll vertical.
+* Una fila con una gráfica, la otra con dos pestañas, cada una de ellas con una gráfica. Sin scroll vertical.
+
+### Actividad 2
+
+Utilizando el dataset de AirBnB `listings.csv`, que contiene un resumen de los datos más relevantes por cada alojamiento, crea un cuadro de mando con _flexdashboard_ que tenga:
+
+* Cajas de valores con:
+
+    * El número de alojamientos totales
+    * El precio medio por noche
+    * El porcentaje que son alojamientos completos
+    * El porcentaje que son habitaciones privadas
+
+* Un mapa con pequeños marcadores donde se sitúan los alojamientos (cada tipo de alojamiento con un color diferente). Si tiene demasiados datos y tarda mucho en cargar, puedes coger un subconjunto aleatorio de los datos.
+
+* Una gráfica de barras con la cantidad de alojamientos por tipo de habitación.
+
+_Bonus_: amplía tu dashboard con más páginas y gráficas, intentando reproducir la información mostrada [aquí](http://insideairbnb.com/madrid/#).

@@ -1,0 +1,362 @@
+---
+title: '6 - Gráficos interactivos con plotly: nivel avanzado'
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+---
+
+## ¿Qué vamos a hacer?
+
+En el capítulo anterior realizamos nuestras primeras visualizaciones de datos interactivas con plotly. En este, veremos funcionalidades más avanzadas: controles y animaciones.
+
+## Barra de herramientas
+
+La barra de herramientas (_modebar_) de plotly es el conjunto de botones que aparece arriba a la derecha con los gráficos que creamos.
+
+Por ejemplo:
+
+```{r}
+library(dplyr)
+library(plotly)
+library(palmerpenguins)
+
+p <- plot_ly(data = penguins, type = "scatter", mode = "markers",
+             x = ~flipper_length_mm, y = ~body_mass_g)
+p
+```
+
+Por defecto aparece con estos controles:
+
+* `toImage`: descarga como imagen estática (png) el gráfico.
+* `zoom2d`: hace zoom en la zona seleccionada.
+* `pan2d`: cambia el control por un _drag_ (pinchar y arrastrar) para desplazar la zona visible del gráfico.
+* `select2d`: selecciona una zona con un cuadrado.
+* `lasso2d`: selecciona una zona con un lazo libre.
+* `zoomIn2d`: aumenta el zoom.
+* `zoomOut2d`: disminuye el zoom.
+* `autoScale2d`: establece automáticamente el zoom y la posición para que se visualicen todos los datos.
+* `resetScale2d`: resetea los parámetros de zoom a su estado original.
+* `toggleSpikelines`: muestra u oculta las guías que van desde los ejes hasta su valor en el gráfico.
+* `hoverClosestCartesian`: muestra el tooltip al pasar el ratón por encima, en donde se encuentra su valor.
+* `hoverCompareCartesian`: muestra el tooltip continuamente, con el valor sobre el punto y el eje. Si hay varias trazas, lo muestra sobre todas ellas.
+* Y el logo de plotly
+
+> Interactúa con estos controles en el gráfico que acabas de representar.
+
+Puedes ver (está en _javascript_, pero es posible interpretarlo) todas las posibles opciones de la barra de herramientas [aquí](https://github.com/plotly/plotly.js/blob/master/src/components/modebar/buttons.js).
+
+Esta barra de herramientas se puede personalizar con la functión `config()`. Es muy recomendable hacerlo, según el uso que creamos que debe darle el usuario de esta visualización. Y aplicar la misma configuración a todos los gráficos del cuadro de mando.
+
+Para eliminarla completamente, ponemos a `FALSE` la opción `displayModeBar`.
+
+```{r}
+p %>%
+  config(displayModeBar = FALSE)
+```
+
+Para eliminar el logo de plotly:
+
+```{r}
+p %>%
+  config(displaylogo = FALSE)
+```
+
+Para eliminar una serie de botones:
+
+```{r}
+p %>%
+  config(modeBarButtonsToRemove = c("zoom2d", "zoomIn2d", "zoomOut2d", "autoScale2d"))
+```
+
+## Controles interactivos
+
+Los controles son elementos que ponemos a disposición del usuario y que alteran de alguna manera la visualización.
+
+Estos controles los definimos mediante la propiedad `updatemenu` de `layout()`. Dependiendo de la acción que realizará la interacción con el control, debemos establecer el parámetro `method`:
+
+* `restyle`: modifica los datos o sus atributos.
+* `relayout`: modifica los atributos del _layout_.
+* `update`: modifica los datos y/o el _layout_.
+* `animate`: comienza o pausa la animación.
+
+### Botones
+
+Para crear un botón, añadiremos un `updatemenu` con `type="buttons"` y un parámetro `buttons` con el nombre (`label`) y el efecto que provoca (`method` y `args`).
+
+Veamos un ejemplo con el que cambiar el color de los puntos. Usaremos el método de `restyle`:
+
+```{r}
+plot_ly(data = penguins, type = "scatter", mode = "markers",
+        x = ~flipper_length_mm, y = ~body_mass_g, color = I("blue")) %>%
+  layout(updatemenus = list(
+    list(
+      type = "buttons",
+      buttons = list(
+        list(label = "Azul",
+             method = "restyle",
+             args = list("marker.color", "blue")),
+        list(label = "Rojo",
+             method = "restyle",
+             args = list("marker.color", "red")))
+    )))
+```
+
+> Cuidado con los niveles de anidamiento de las listas, es fácil confundirse y poner alguno de menos.
+
+Si el parámetro que queremos modificar con el botón se encuentra dentro de `layout()`, utilizaremos el método de `relayout`.
+
+Veamos un caso en el que queremos mostrar u ocultar la leyenda en base al click sobre el botón.
+
+```{r}
+plot_ly(data = penguins, type = "scatter", mode = "markers",
+        x = ~flipper_length_mm, y = ~body_mass_g, color = ~species, colors = "Set1") %>%
+  layout(
+    updatemenus = list(
+    list(
+      type = "buttons",
+      buttons = list(
+        list(label = "Mostrar",
+             method = "relayout",
+             args = list("showlegend", TRUE)),
+        list(label = "Ocultar",
+             method = "relayout",
+             args = list("showlegend", FALSE)))
+    )))
+```
+
+Cuando necesitamos actualizar tanto los datos como el _layout_, utilizamos el método de `update`. Su parámetro `args` será una lista de dos elementos: el primero, el que modifica los datos o sus atributos; el segundo, el que modifica el _layout_.
+
+Un caso de uso habitual es para mostrar diferentes series en un gráfico.
+
+```{r}
+# Leemos los datos de las elecciones presidenciales de EEUU
+usa_president <- read.csv("dat/usa_president.csv")
+
+# Nos quedamos solo con los resultados de demócratas y republicanos
+# y agrupamos para conocer el número de votos de cada partido por año
+# Atención: normalmente no es necesario hacer el ungroup explícito de
+# un dataframe con dplyr, pero en este caso, si no lo haces, no se pintan
+# correctamente las líneas con plotly
+usa_president_by_year <- usa_president %>%
+  filter(party %in% c("democrat", "republican"),
+         writein == FALSE) %>%
+  group_by(year, party) %>%
+  summarise(candidatevotes = sum(candidatevotes)) %>%
+  arrange(year) %>%
+  ungroup()
+
+# Separamos en dos dataframes los votos de unos y de otros
+usa_democrat <- usa_president_by_year %>%
+  filter(party == "democrat")
+
+usa_republican <- usa_president_by_year %>%
+  filter(party == "republican")
+
+# Creamos un gráfico en el que el usuario puede elegir si ver la evolución
+# del voto demócrata, republicano o ambas
+plot_ly(type = "scatter", mode = "lines", x = ~year, y = ~candidatevotes,
+        data = usa_democrat, name = "Demócratas", color = I("blue")) %>%
+  add_lines(data = usa_republican, name = "Republicanos", color = I("red")) %>%
+  layout(
+    updatemenus = list(
+    list(
+      type = "buttons",
+        buttons = list(
+          list(label = "Ambos",
+               method = "update",
+               args = list(
+                 list(visible = c(TRUE, TRUE)),
+                 list(title = "Evolución del voto demócrata y republicano")
+               )),
+          list(label = "Demócrata",
+               method = "update",
+               args = list(
+                 list(visible = c(TRUE, FALSE)),
+                 list(title = "Evolución del voto demócrata")
+               )),
+          list(label = "Republicano",
+               method = "update",
+               args = list(
+                 list(visible = c(FALSE, TRUE)),
+                 list(title = "Evolución del voto republicano")
+               ))
+    ))))
+```
+
+### Selectores
+
+Los selectores (_dropdowns_) se configuran de forma equivalente a los botones. La diferencia entre unos y otros es visual: mientras que los botones se muestran todos al mismo tiempo, el selector es un menú desplegable en el que solo se ve una opción activa.
+
+Vamos a reproducir el ejemplo previo con un _dropdown_. Basta con eliminar `type = "buttons"` dentro de la especificación de `updatemenus`.
+
+```{r}
+# Creamos un gráfico en el que el usuario puede elegir si ver la evolución
+# del voto demócrata, republicano o ambas
+plot_ly(type = "scatter", mode = "lines", x = ~year, y = ~candidatevotes,
+        data = usa_democrat, name = "Demócratas", color = I("blue")) %>%
+  add_lines(data = usa_republican, name = "Republicanos", color = I("red")) %>%
+  layout(
+    updatemenus = list(
+      list(
+        buttons = list(
+          list(label = "Ambos",
+               method = "update",
+               args = list(
+                 list(visible = c(TRUE, TRUE)),
+                 list(title = "Evolución del voto demócrata y republicano")
+               )),
+          list(label = "Demócrata",
+               method = "update",
+               args = list(
+                 list(visible = c(TRUE, FALSE)),
+                 list(title = "Evolución del voto demócrata")
+               )),
+          list(label = "Republicano",
+               method = "update",
+               args = list(
+                 list(visible = c(FALSE, TRUE)),
+                 list(title = "Evolución del voto republicano")
+               ))
+    ))))
+```
+
+### Selectores de rango
+
+Los selectores de rango sirven para hacer zoom sobre un área concreta del gráfico. Se utiliza a menudo en las series temporales, inicializado a los datos más recientes, pero con posibilidad de visualizar mayor histórico.
+
+```{r}
+# Lectura de los datos
+defunciones <- read.csv("dat/defunciones_espana.csv")
+
+# Conversión de la fecha de tipo character a Date
+defunciones <- defunciones %>%
+  mutate(fecha_defuncion = as.Date(fecha_defuncion))
+
+# Pintamos la mortalidad observada y la estimada junto con su intervalo de confianza
+plot_ly(defunciones, type = "scatter", mode = "lines") %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_observadas, name = "Observadas",
+            line = list(color = "black")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas, name = "Esperadas",
+            line = list(color = "rgb(22, 96, 167)")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas_q99, name = "Esperadas lim. sup.",
+            line = list(color = "gray", width = 0.5, dash = "dash")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas_q01, name = "Esperadas lim. inf.",
+            fill = "tonexty", fillcolor="rgba(22, 96, 167, 0.3)",
+            line = list(color = "gray", width = 0.5, dash = "dash")) %>%
+  layout(title = "Mortalidad en España",
+         xaxis = list(
+           title = "Fecha",
+           rangeselector = list(
+             buttons = list(
+               list(
+                 count = 3,
+                 label = "3 meses",
+                 step = "month",
+                 stepmode = "backward"),
+               list(
+                 count = 6,
+                 label = "6 meses",
+                 step = "month",
+                 stepmode = "backward"),
+               list(
+                 label = "todo",
+                 step = "all")
+               )),
+    
+            rangeslider = list(type = "date")),
+         yaxis = list(title = "Defunciones")
+  )
+```
+
+
+## Animaciones
+
+En `plot_ly` contamos con una propiedad estética para animar los gráficos: `frame`. También soporta un parámetro `ids` para suavizar las transiciones con el mismo identificador.
+
+Para visualizar los siguientes ejemplos, necesitarás tener instalado el paquete `gapminder`, que contiene datos de esperanza de vida, PIB per cápita y población por país y año.
+
+```{r, eval=FALSE}
+# Ejecuta la siguiente línea en el caso de que no lo tengas instalado
+install.packages("gapminder")
+```
+
+```{r}
+# Cargamos los datos de gapminder
+data(gapminder, package = "gapminder")
+
+# Este es el gráfico base, sin animar
+p <- gapminder %>%
+  plot_ly(x = ~gdpPercap, y = ~lifeExp, size = ~pop, 
+          text = ~country, color = ~continent, hoverinfo = "text") %>%
+  layout(xaxis = list(type = "log"))
+
+p
+```
+Para animarlo, añadimos la capa a animar, especificando frame y, opcionalmente, ids (solo es necesario si queremos suavizar las transiciones entre objetos). También debemos aplicar la función `animation_opts`. Alguno de sus argumentos son:
+
+* `frame`: los milisegundos que dura cada unidad de frame.
+* `transition`: los milisegundos que dura la transición (por defecto toma el mismo valor que `frame`).
+* `easing`: el tipo de transición ([aquí](https://github.com/plotly/plotly.js/blob/master/src/plots/animation_attributes.js) tienes todas). Algunas son: `linear`, `quad`, `cubic`, `sin`, `elastic`, `bounce`, ...
+
+```{r}
+p %>%
+  add_markers(frame = ~year, ids = ~country) %>%
+  animation_opts(frame = 1000, easing = "linear", redraw = FALSE)
+```
+
+> Prueba a cambiar el tipo de transición (`easing`) por otro y observa el efecto.
+
+Podemos personalizar la posición del botón de animación.
+
+```{r}
+p %>%
+  add_markers(frame = ~year, ids = ~country) %>%
+  animation_opts(frame = 1000, easing = "linear", redraw = FALSE) %>%
+  animation_button(x = 1, xanchor = "right", y = 0, yanchor = "bottom")
+```
+
+Y también podemos personalizar el _slider_ de animación.
+
+```{r}
+# Para animarlo:
+# 1. Añadimos la capa a animar, especificando frame y, opcionalmente, ids
+# 2. Configramos la animación mediante animation_opts, _button y _slider
+p %>%
+  add_markers(frame = ~year, ids = ~country) %>%
+  animation_opts(frame = 1000, easing = "linear", redraw = FALSE) %>%
+  animation_button(x = 1, xanchor = "right", y = 0, yanchor = "bottom") %>%
+  animation_slider(currentvalue = list(prefix = "Año "))
+```
+
+> Consulta la documentación de `animation_opts`, `animation_button` y `animation_slider`.
+
+## Profundiza
+
+Para saber más sobre los conceptos que hemos visto, puedes consultar alguna de estas referencias:
+
+* [Chuleta de plotly](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf): sintetiza las funciones más habituales para plotly. Muy útil para tener a mano a la hora de utilizar la librería.
+* [Referencia completa de atributos de plotly](https://plotly.com/r/reference): documenta todos los posibles atributos que se pueden establecer por cada tipo de gráfico.
+* [Más opciones en la barra de herramientas de plotly](https://plotly-r.com/control-modebar.html): consúltalo para crear botones personalizados o controlar la forma en la que se descarga un gráfico como imagen.
+* [Controles de plotly](https://plotly.com/r/#controls): documentación completa sobre los controles de interacciones de plotly.
+* [Animaciones acumuladas](https://plotly.com/r/cumulative-animations/): documenta cómo realizar animaciones acumuladas (por ejemplo, el efecto de una línea que va avanzando poco a poco)
+* [Más sobre animaciones en plotly](https://plotly-r.com/animating-views.html): hay varios ejemplos completos de animaciones con plotly.
+
+## Conclusiones
+
+Nos podemos quedar con las siguientes ideas como resumen de este tema:
+
+* Los gráficos en plotly traen una barra de acciones con bastantes opciones por defecto. Conviene personalizarla según las opciones que realmente vaya a necesitar el usuario.
+* Podemos añadir botones y selectores a los gráficos de plotly para disparar acciones que alteran la visualización.
+* Las animaciones cuentan con un estético a mapear nuevo: `frame`. Opcionalmente usaremos `ids` si necesitamos suavizar las transiciones entre un mismo objeto.
+
+## Actividades
+
+### Actividad 1
+
+Utilizando los datos del dataset de `penguins`, pinta un gráfico de puntos que muestre la relación entre longitud y profunidad del pico. Añade un selector (_dropdown_) que permita al usuario elegir si quiere ver los datos de los machos, las hembras o ambos.
+
+### Actividad 2
+
+Lee los datos de evolución de la población en España (dat/poblacion_espana.csv). Crea una animación que muestre un gráfico de líneas, donde el eje `x` muestra la edad de inicio del rango (edad_desde), y el eje `y` muestra la población en ese rango. Anima el gráfico para que vaya mostrando la evolución año a año.
+

@@ -1,0 +1,93 @@
+---
+title: 'Soluciones capítulo 5'
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+---
+
+```{r, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(palmerpenguins)
+library(plotly)
+```
+
+
+### Actividad 1
+
+Utilizando el dataset `diamonds`, representa la relación en un gráfico de puntos del precio frente a los quilates.
+
+```{r}
+diamonds_5k <- sample_n(diamonds, 5000)
+
+plot_ly(diamonds_5k, type = "scatter", mode = "markers",
+        x = ~carat, y = ~price)
+```
+
+### Actividad 2
+
+Con el dataset `penguins`:
+
+1. Pinta la relación entre longitud y profundidad del pico.
+
+2. Añade al gráfico del punto 1 la distinción entre especies mediante el color.
+
+3. Añade al gráfico del punto 1 la distinción entre el peso corporal mediante el color.
+
+```{r}
+plot_ly(penguins, type = "scatter", mode = "markers",
+        x = ~bill_length_mm, y = ~bill_depth_mm)
+```
+
+```{r}
+plot_ly(penguins, type = "scatter", mode = "markers",
+        x = ~bill_length_mm, y = ~bill_depth_mm, color = ~species)
+```
+
+```{r}
+plot_ly(penguins, type = "scatter", mode = "markers",
+        x = ~bill_length_mm, y = ~bill_depth_mm, color = ~body_mass_g)
+```
+
+### Actividad 3
+
+1. Lee los datos del economista (dat/economist.csv), con indicadores de desarrollo y corrupción por países:
+
+* HDI: Human Development Index (1: más desarrollado)
+* CPI: Corruption Perception Index (10: menos corrupto)
+
+2. Crea un gráfico que:
+
+* Cada país sea un punto
+* El eje x indique CPI, el y HDI
+* El color del punto indique la región
+* Su tamaño sea proporcional al ranking HDI
+
+```{r}
+economist <- read.csv("dat/economist.csv")
+
+plot_ly(economist, type = "scatter", mode = "markers",
+        x = ~CPI, y = ~HDI, size = ~HDI.Rank, color = ~Region, text = ~Country,
+        hovertemplate = "<b>%{text}</b><br>CPI: %{x}<br>HDI: %{y}")
+```
+
+### Actividad 4
+
+1. Lee los datos de los resultados de las elecciones presidenciales de los Estados Unidos (dat/usa_president.csv).
+
+2. Pinta en un gráfico de líneas la evolución del número de votos a lo largo de los años del partido republicado frente al demócrata.
+
+```{r}
+usa_president <- read.csv("dat/usa_president.csv")
+
+usa_elections <- usa_president %>%
+  filter(!writein, party %in% c("democrat", "republican")) %>%
+  group_by(year, party) %>%
+  summarise(candidatevotes = sum(candidatevotes)) %>%
+  ungroup()
+
+plot_ly(usa_elections, type = "scatter", mode = "lines",
+        x = ~year, y = ~candidatevotes, color = ~party)
+```
+

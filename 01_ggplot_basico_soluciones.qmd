@@ -1,0 +1,109 @@
+---
+title: 'Soluciones capítulo 1'
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+---
+
+```{r, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(palmerpenguins)
+```
+
+
+### Actividad 1
+
+Abre [colorbrewer](http://colorbrewer2.org/) y elige una paleta de colores para representar estos tres gráficos sobre el mapa que muestran de ejemplo. Para elegir una correcta, piensa en la naturaleza de los datos (secuenciales, divergentes o cualitativos):
+
+1. El nivel de contaminación por región: **secuencial**
+2. Cambio relativo en el número de habitantes con respecto a la última decada (p.e. -5%, +10%, ...): **divergente**
+3. La etnia predominante por región: **cualitativa**
+
+### Actividad 2
+
+Examina el dataset `diamonds`, incluido dentro de la librería de `ggplot2`. Consulta la ayuda con `?diamonds` y examina su contenido.
+
+Pinta la relación en un gráfico de puntos del precio frente a los quilates.
+
+```{r}
+# opcional, toco el alpha (opacidad) para que se vean mejor los puntos superpuestos
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point(alpha = 0.2)
+```
+
+### Actividad 3
+
+Con el dataset `penguins`:
+
+1. Pinta la relación entre longitud y profundidad del pico (bill).
+
+```{r}
+ggplot(data = penguins) +
+  geom_point(mapping = aes(x = bill_length_mm, y = bill_depth_mm))
+```
+
+2. Añade al gráfico del punto 1 la distinción entre especies mediante el color.
+
+```{r}
+ggplot(data = penguins) +
+  geom_point(mapping = aes(x = bill_length_mm, y = bill_depth_mm, color = species))
+```
+
+3. Añade al gráfico del punto 1 la distinción entre el peso corporal mediante el color.
+
+```{r}
+ggplot(data = penguins) +
+  geom_point(mapping = aes(x = bill_length_mm, y = bill_depth_mm, color = body_mass_g))
+```
+
+4. ¿Qué observas en las escalas de color que ha utilizado ggplot en cada uno de los dos casos? ¿De qué naturaleza (secuencial, divergente o cualitativa) es cada una de ellas? ¿Por qué crees que ha hecho esto por defecto?
+
+Respuesta: para `species` se utiliza una escala cualitativa, para `body_mass_g` se utiliza una secuencial. Es por el tipo de dato: para datos factor / cadenas de caracters / booleanos, ggplot utiliza por defecto escalas cualitativas. Para numéricos, ggplot utiliza escalas secuenciales.
+
+### Actividad 4
+
+1. Lee los datos del economista (dat/economist.csv), con indicadores de desarrollo y corrupción por países:
+
+* HDI: Human Development Index (1: más desarrollado)
+* CPI: Corruption Perception Index (10: menos corrupto)
+
+2. Crea un gráfico que:
+
+* Cada país sea un punto
+* El eje x indique CPI, el y HDI
+* El color del punto indique la región
+* Su tamaño sea proporcional al ranking HDI
+
+3. ¿Qué conclusiones extraes del gráfico?
+
+```{r}
+economist <- read.csv("dat/economist.csv")
+
+ggplot(economist) +
+  geom_point(aes(x = CPI, y = HDI, color = Region, size = HDI.Rank))
+```
+
+### Actividad 5
+
+1. Lee los datos de los resultados de las elecciones presidenciales de los Estados Unidos (dat/usa_president.csv). Puedes consultar más información sobre este dataset [aquí](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX).
+
+2. Pinta en un gráfico de líneas la evolución del número de votos a lo largo de los años del partido republicado frente al demócrata.
+
+> Ten en cuenta que tendrás que hacer una transformación de los datos antes de pintarlos. Razona en qué formato necesitas el dataframe y aplica las operaciones necesarias antes de utilizar ggplot.
+
+```{r}
+# Lectura del dataset
+usa_president <- read.csv("dat/usa_president.csv")
+
+# Agrupo para los partidos de interés, por año y partido
+usa_president_by_year <- usa_president %>%
+  filter(party %in% c("democrat", "republican")) %>%
+  group_by(year, party) %>%
+  summarise(candidatevotes = sum(candidatevotes))
+
+# Pinto las líneas por cada partido
+ggplot(usa_president_by_year) +
+  geom_line(aes(x = year, y = candidatevotes, color = party))
+```

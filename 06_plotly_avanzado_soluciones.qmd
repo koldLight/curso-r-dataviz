@@ -1,0 +1,64 @@
+---
+title: 'Soluciones capítulo 6'
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+---
+
+
+```{r, message=FALSE}
+library(dplyr)
+library(tidyr)
+library(palmerpenguins)
+library(plotly)
+```
+
+
+### Actividad 1
+
+Utilizando los datos del dataset de `penguins`, pinta un gráfico de puntos que muestre la relación entre longitud y profunidad del pico. Añade un selector (_dropdown_) que permita al usuario elegir si quiere ver los datos de los machos, las hembras o ambos.
+
+```{r}
+updatemenus <- list(
+      list(
+        buttons = list(
+          list(label = "Ambos",
+               method = "update",
+               args = list(
+                 list(visible = c(TRUE, TRUE))
+               )),
+          list(label = "Hembras",
+               method = "update",
+               args = list(
+                 list(visible = c(TRUE, FALSE))
+               )),
+          list(label = "Machos",
+               method = "update",
+               args = list(
+                 list(visible = c(FALSE, TRUE))
+               ))
+    )))
+
+penguins_f <- filter(penguins, sex == "female")
+penguins_m <- filter(penguins, sex == "male")
+
+plot_ly(penguins_f, type = "scatter", mode = "markers",
+        x = ~bill_length_mm, y = ~bill_depth_mm, color = I("purple"),
+        name = "Hembras") %>%
+  add_trace(data = penguins_m, color = I("orange"), name = "Machos") %>%
+  layout(updatemenus = updatemenus)
+```
+
+### Actividad 2
+
+Lee los datos de evolución de la población en España (dat/poblacion_espana.csv). Crea una animación que muestre un gráfico de líneas, donde el eje `x` muestra la edad de inicio del rango (edad_desde), y el eje `y` muestra la población en ese rango. Anima el gráfico para que vaya mostrando la evolución año a año.
+
+```{r}
+poblacion <- read.csv("dat/poblacion_espana.csv")
+
+plot_ly(poblacion, type = "scatter", mode = "lines",
+        x = ~edad_desde, y = ~poblacion, frame = ~anio, name = "Población") %>%
+  layout(title = "Evolución de la población española",
+         xaxis = list(title = "Rango edad"))
+```

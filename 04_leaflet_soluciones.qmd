@@ -1,0 +1,195 @@
+---
+title: "Soluciones capítulo 4"
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+---
+
+```{r, message=FALSE}
+library(dplyr)
+library(sf)
+library(leaflet)
+library(tidyr)
+```
+
+
+### Actividad 1
+
+Pinta el metro de Madrid, con:
+
+* Las paradas
+* Las líneas de metro, cada una con un color diferente.
+
+_Nota_: No vale crear una capa por línea diferente de metro, todas las líneas deben ir en la misma.
+
+_Bonus_: personaliza los colores con el suyo oficial (línea 2 en rojo, línea 7 en naranja, ...)
+
+```{r}
+paradas_metro <- read_sf("dat/paradas_metro_madrid.geojson")
+lineas_metro  <- read_sf("dat/lineas_metro.geojson")
+
+colores_lineas <- c(
+  "L1"    = "#38a3dc",
+  "L2"    = "#f40104",
+  "L3"    = "#fbe115",
+  "L4"    = "#944247",
+  "L5"    = "#96bf0e",
+  "L6"    = "#9fa4a6",
+  "L7"    = "#f7a64b",
+  "L8"    = "#f500ff",
+  "L9"    = "#a3228d",
+  "L10"   = "#174594",
+  "L11"   = "#185b00",
+  "L12"   = "#a49a00",
+  "Ramal" = "#090080"
+)
+
+# Cuidado, no confundas domain y levels. levels respeta el orden,
+# domain no
+paleta_lineas <- colorFactor(
+  palette = unname(colores_lineas),
+  levels  = names(colores_lineas)
+)
+
+leaflet(lineas_metro) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addPolylines(data = lineas_metro, color = ~paleta_lineas(Linea), opacity = 0.8) %>%
+  addCircleMarkers(data = paradas_metro, stroke = FALSE, radius = 5, fillOpacity = 0.5) %>%
+  addLegend(
+    position = "bottomright",
+    pal      = paleta_lineas,
+    values   = ~Linea,
+    title    = "Línea"
+  )
+```
+
+### Actividad 2
+
+Reproduce un mapa con el % de voto a cada uno de los 4 principales partidos por Comunidad Autónoma, en lugar de por provincia.
+
+Necesitarás, además de los datos que ya hemos ido usando en este capítulo, los siguientes:
+
+* `dat/provincias_ccaas.csv`: con el detalle de qué provincia pertenece a cada comunidad autónoma (mediante sus códigos INE).
+* `dat/spain_ccaas.geojson`: con el geojson de las comunidades autónomas simplificado
+
+```{r}
+# Código adaptado del ejemplo por provincias del capítulo
+# Lectura de geojson
+mapa_ccaas <- read_sf("dat/spain_ccaas.geojson")
+
+# Lectura de datos
+elecciones <- read.csv("dat/elecciones_2019_provincias.csv")
+votos <- read.csv("dat/elecciones_2019_votos.csv")
+prov_ccaa <- read.csv("dat/provincias_ccaas.csv")
+
+votos_partidos <- votos %>%
+  mutate(
+    partido = ifelse(partido %in% c("encomupodem", "podemos_encomun"), "podemos", partido),
+    partido = ifelse(partido == "navarra_suma", "pp", partido),
+  ) %>%
+  filter(partido %in% c("psoe", "pp", "vox", "podemos")) %>%
+  inner_join(elecciones, by = "provincia_cod_ine") %>%
+  inner_join(prov_ccaa, by = c("provincia_cod_ine" = "cod_ine_provincia")) %>%
+  group_by(cod_ine_ccaa, partido) %>%
+  summarise(
+    votos = sum(votos),
+    votos_validos = sum(votos_validos)
+  ) %>%
+  mutate(ratio_votos = round(votos / votos_validos, 3)) %>%
+  select(cod_ine_ccaa, partido, ratio_votos)
+
+# Nos viene mejor pasarlo a formato ancho, con una columna por partido
+votos_partidos_ancho <- votos_partidos %>%
+  pivot_wider(names_from = partido, values_from = ratio_votos)
+
+mapa_votos <- mapa_ccaas %>%
+  inner_join(votos_partidos_ancho, by = c("codigo" = "cod_ine_ccaa"))
+
+# Las paletas, también rescatadas del capítulo
+pal_votos_psoe <- colorBin(
+  palette = "Reds",
+  domain  = mapa_votos$psoe,
+  bins    = 5
+)
+
+pal_votos_pp <- colorBin(
+  palette = "Blues",
+  domain  = mapa_votos$pp,
+  bins    = 5
+)
+
+pal_votos_vox <- colorBin(
+  palette = "Greens",
+  domain  = mapa_votos$vox,
+  bins    = 5
+)
+
+pal_votos_podemos <- colorBin(
+  palette = "Purples",
+  domain  = mapa_votos$vox,
+  bins    = 5
+)
+
+# Pinto el mapa, con una capa por ratio de votos a ese partido
+leaflet(data = mapa_votos) %>%
+  # Capa del PSOE
+  addPolygons(color       = ~pal_votos_psoe(psoe),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "PSOE"
+  ) %>%
+  # Capa del PP
+  addPolygons(color       = ~pal_votos_pp(pp),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "PP"
+  ) %>%
+  # Capa de VOX
+  addPolygons(color       = ~pal_votos_vox(vox),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "VOX"
+  ) %>%
+  # Capa de Podemos
+  addPolygons(color       = ~pal_votos_podemos(podemos),
+              label       = ~nombre,
+              stroke      = FALSE,
+              fillOpacity = 1,
+              group       = "Podemos"
+  ) %>%
+  # Control de capas
+  addLayersControl(
+    baseGroups = c("PSOE", "PP", "VOX", "Podemos"),
+    options = layersControlOptions(collapsed = FALSE)
+  )
+```
+
+### Actividad 3
+
+Lee `dat/listings.csv`. Contiene un listado de alojamientos anunciados en AirBnB en Madrid.
+
+Coge aleatoriamente una muestra de 500 alojamientos y píntalos sobre un mapa de Madrid. Cada marcador debe tener un color diferente dependiendiendo del tipo (`room_type`).
+
+```{r}
+listings <- read.csv("dat/listings.csv") %>%
+  sample_n(500)
+
+paleta_tipo <- colorFactor("Set1", domain = unique(listings$room_type))
+
+leaflet(listings) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addCircleMarkers(lat = ~latitude, lng = ~longitude, color = ~paleta_tipo(room_type),
+                   stroke = FALSE, radius = 2, fillOpacity = 0.5) %>%
+  addLegend(
+    position = "bottomright",
+    pal      = paleta_tipo,
+    values   = ~room_type,
+    title    = "Tipo de habitación"
+  )
+```

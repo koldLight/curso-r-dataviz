@@ -1,0 +1,106 @@
+---
+title: "Soluciones capítulo 8"
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+output:
+  html_document:
+    highlight: null
+---
+
+Para probar que se genera correctamente el dashboard con flexdashboard, tendrás que copiar el código a un .Rmd y renderizarlo p.e. desde RStudio.
+
+
+````markdown
+---
+title: "Airbnb en Madrid"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: rows
+    vertical_layout: fill
+---
+
+`r ''````{r setup, include=FALSE}
+library(flexdashboard)
+library(plotly)
+library(dplyr)
+library(leaflet)
+```
+
+`r ''````{r}
+# Lectura y tratamiento de datos
+listings <- read.csv("dat/listings.csv")
+```
+
+Row
+-----------------------------------------------------------------------
+
+### Número de alojamientos
+
+`r ''````{r}
+valueBox(nrow(listings), icon = "fa-home")
+```
+
+`r ''````{r}
+valueBox(nrow(listings), icon = "fa-home")
+```
+
+### Precio medio por noche
+
+`r ''````{r}
+valueBox(round(mean(listings$price)), icon = "fa-euro")
+```
+
+
+### % alojamientos completos
+
+`r ''````{r}
+count_entire <- nrow(listings[listings$room_type == "Entire home/apt", ])
+valueBox(round(100 * count_entire / nrow(listings)), icon = "fa-home")
+```
+
+
+### % habitaciones privadas
+
+`r ''````{r}
+count_private <- nrow(listings[listings$room_type == "Private room", ])
+valueBox(round(100 * count_private / nrow(listings)), icon = "fa-home")
+```
+
+
+Row
+-----------------------------------------------------------------------
+
+### Distribución geográfica
+
+`r ''````{r}
+listings_1k <- listings %>%
+  sample_n(1000)
+
+paleta_tipo <- colorFactor("Set1", domain = unique(listings_1k$room_type))
+
+leaflet(listings_1k) %>%
+  addProviderTiles("CartoDB.Positron") %>%
+  setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+  addCircleMarkers(lat = ~latitude, lng = ~longitude, color = ~paleta_tipo(room_type),
+                   stroke = FALSE, radius = 2, fillOpacity = 0.5) %>%
+  addLegend(
+    position = "bottomright",
+    pal      = paleta_tipo,
+    values   = ~room_type,
+    title    = "Tipo de habitación"
+  )
+```
+
+### Alojamientos por tipo de habitación
+
+`r ''````{r}
+count_by_type <- listings %>%
+  group_by(room_type) %>%
+  summarise(count = n())
+
+plot_ly(count_by_type, type = "bar", x = ~room_type, y = ~count)
+```
+
+````

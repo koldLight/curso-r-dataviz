@@ -1,0 +1,214 @@
+---
+title: "Soluciones capítulo 10"
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+output:
+  html_document:
+    highlight: null
+---
+
+Para probar correctamente las aplicaciones shiny, tendrás que copiar y pegar el código a un intérprete de R.
+
+
+```{r, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(shiny)
+library(palmerpenguins)
+library(plotly)
+library(leaflet)
+library(DT)
+library(sf)
+```
+
+
+### Actividad 1
+
+Partiendo del ejemplo `examples/02_fibonacci_con_conductor`, añade un botón al menú lateral y cambia la implementación para que los resultados se actualicen al pulsarlo, y no al cambiar el parámetro de entrada.
+
+```{r}
+# Función para calcular el enésimo número de la serie de fibonacci
+fibonacci <- function(n) {
+  if (n < 1) {
+    return(NA)
+  }
+  if (n < 3) {
+    return(1)
+  }
+  fibonacci(n - 1) + fibonacci(n - 2)
+}
+
+
+# La interfaz gráfica
+ui <- fluidPage(
+  
+  # El título de la aplicación
+  titlePanel("Serie de Fibonacci"),
+  
+  # Un panel que tiene una zona más pequeña en el lateral izquierdo,
+  # y un panel principal más grande a la derecha
+  sidebarLayout(
+    
+    # Usaremos el panel izquierdo para los inputs
+    sidebarPanel(
+      
+      # Input de tipo slide
+      numericInput(inputId   = "numero",
+                   label     = h3("Número"),
+                   value     = 10,
+                   min       = 1,
+                   max       = 30),
+      
+      # El botón
+      actionButton(inputId = "boton", label = "Calcular")
+    ),
+    
+    # El panel principal con los outputs
+    mainPanel(
+      
+      h4("Serie: ", textOutput(outputId = "serie")),
+      h4("Suma: ",  textOutput(outputId = "suma")),
+      h4("Media: ", textOutput(outputId = "media")),
+      
+    )
+  )
+)
+
+# El servidor
+server <- function(input, output) {
+  
+  # El conductor, que devuelve la serie.
+  # Hay que encapsularlo dentro de una expresión en la función reactive
+  serie <- reactive({
+    input$boton
+    numero <- isolate(input$numero)
+    sapply(1:numero, fibonacci)
+  })
+  
+  # El output serie contiene toda la serie
+  output$serie <- renderText({
+    paste(serie(), collapse = ", ")
+  })
+  
+  # El output suma contiene toda la suma de todos los valores de la serie
+  output$suma <- renderText({
+    sum(serie())
+  })
+  
+  # El output media contiene toda la media de todos los valores de la serie
+  output$media <- renderText({
+    mean(serie())
+  })
+  
+}
+
+# Generamos la aplicación
+shinyApp(ui = ui, server = server)
+```
+
+### Actividad 2
+
+Crea una aplicación de shiny para visualizar el porcentaje de voto a cada uno de los partidos en las últimas elecciones.
+
+La aplicación tendrá:
+
+* Como inputs, el listado de partidos disponibles.
+* Como outputs:
+
+    * Un mapa de `leaflet` mostrando las provincias, coloreadas según el porcentaje de voto (es decir, los votos a ese partido / los votos válidos en la provincia) obtenido en cada una de ellas. Incluye una leyenda para poder interpretarlo fácilmente.
+    * Un gráfico de barras de `plotly` mostrando el número de votos por provincia, ordenado de mayor a menor número de votos.
+    
+La función de tratamiento y filtrado de los datos para obtener el número de votos (absoluto y porcentual) por provincia al partido seleccionado deberá ejecutarse una única vez, y no repetirse para cada salida.
+
+```{r}
+
+# La interfaz gráfica
+ui <- fluidPage(
+  
+  titlePanel("Elecciones España"),
+  
+  sidebarLayout(
+    
+    sidebarPanel(
+      
+      selectInput(
+        inputId = "partido",
+        label   = "Partido",
+        choices = c("psoe", "pp", "vox", "podemos")
+      )
+    ),
+    
+    mainPanel(
+      leafletOutput("map"),
+      plotlyOutput("chart")
+    )
+  )
+)
+
+# El servidor
+server <- function(input, output) {
+  
+  provincias <- read_sf("dat/spain_provinces.geojson")
+  elecciones <- read.csv("dat/elecciones_2019_provincias.csv")
+  votos <- read.csv("dat/elecciones_2019_votos.csv")
+  
+  colores <- c("psoe" = "Reds", "pp" = "Blues", "vox" = "Greens", "podemos" = "Purples")
+  
+  # Procesamiento de datos
+  datos <- reactive({
+    votos %>%
+      filter(partido == input$partido) %>%
+      inner_join(elecciones) %>%
+      mutate(ratio_votos = round(votos / votos_validos, 3)) %>%
+      select(provincia_cod_ine, provincia_nombre, votos, ratio_votos)
+  })
+  
+  # El output serie contiene toda la serie
+  output$map <- renderLeaflet({
+    # Recupero los datos ya procesados del conductor
+    votos <- datos()
+    
+    # Provincias con su info geográfica
+    mapa_votos <- provincias %>%
+      left_join(votos, by = c("codigo" = "provincia_cod_ine"))
+    
+    # Leyenda
+    pal_votos <- colorBin(
+      palette = colores[input$partido],
+      domain  = mapa_votos$ratio_votos,
+      bins    = 5
+    )
+    
+    # Mapa
+    leaflet(mapa_votos) %>%
+      addPolygons(
+        color       = ~pal_votos(ratio_votos),
+        stroke      = FALSE,
+        fillOpacity = 1) %>%
+      addLegend(
+        position = "bottomright",
+        pal      = pal_votos,
+        values   = ~ratio_votos,
+        title    = "% votos",
+        labFormat = labelFormat(suffix = "%", transform = function(x) 100 * x),
+      )
+  })
+  
+  # El output suma contiene toda la suma de todos los valores de la serie
+  output$chart <- renderPlotly({
+    # Recupero los datos ya procesados del conductor
+    votos <- datos()
+    
+    # Ordeno por número de votos
+    votos <- arrange(votos, votos)
+    votos$provincia_nombre <- factor(votos$provincia_nombre, levels = votos$provincia_nombre)
+    plot_ly(votos, type = "bar", x = ~votos, y = ~provincia_nombre, height = 1200)
+  })
+  
+}
+
+# Generamos la aplicación
+shinyApp(ui = ui, server = server)
+```

@@ -1,0 +1,327 @@
+---
+title: '3 - Gráficos estáticos con ggplot: nivel avanzado'
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+---
+
+## ¿Qué vamos a hacer?
+
+En los capítulos 1 y 2 hemos visto cómo crear gráficos estáticos con ggplot, con diferentes geometrías (puntos, líneas, boxplots, barras, ...), escalas (numéricas continuas, categóricas, temporales, ...) y transformaciones estadísticas.
+
+En este nuevo capítulo vamos a aprender a personalizar los gráficos ajustando el aspecto y a presentar datos geoespaciales sobre mapas.
+
+## 1. Títulos, etiquetas y temas
+
+Vamos a rescatar uno de los gráficos que hicimos en el anterior capítulo para personalizarlo.
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Lectura de los datos
+defunciones <- read.csv("dat/defunciones_espana.csv")
+
+# Conversión de la fecha de tipo character a Date
+defunciones <- defunciones %>%
+  mutate(fecha_defuncion = as.Date(fecha_defuncion))
+
+# Pintamos la mortalidad observada y esperada
+ggplot(defunciones, aes(x = fecha_defuncion)) +
+  geom_ribbon(aes(ymin = defunciones_esperadas_q01, ymax = defunciones_esperadas_q99),
+              fill = "blue", alpha = 0.3) +
+  geom_line(aes(y = defunciones_observadas), color = "black") +
+  geom_line(aes(y = defunciones_esperadas), color = "blue") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b-%y")
+```
+
+Si vamos a utilizar el gráfico en un informe divulgativo o una presentación, es recomendable poner un título, una leyenda, y mejorar el texto de los ejes.
+
+> Conviene tener siempre a mano la documentación de ggplot para conocer todos los elementos que podemos personalizar. Está disponible dentro del paquete lanzando `?labs` o en su [web](https://ggplot2.tidyverse.org/reference/labs.html).
+
+En la documentación, vemos que podemos definir, entr otros elementos:
+
+* Título, subtítulo y pie mediante `labs(title, subtitle, caption)`
+* Nombre de cualquier elemento estético con una lista de valores con nombre. Por ejemplo, `labs(x = "Nombre eje x", fill = "Nombre de la variable para el color")`.
+
+```{r}
+ggplot(defunciones, aes(x = fecha_defuncion)) +
+  geom_ribbon(aes(ymin = defunciones_esperadas_q01, ymax = defunciones_esperadas_q99),
+              fill = "blue", alpha = 0.3) +
+  geom_line(aes(y = defunciones_observadas), color = "black") +
+  geom_line(aes(y = defunciones_esperadas), color = "blue") +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b-%y") +
+  labs(title    = "Mortalidad en España",
+       subtitle = "Defunciones observadas y esperadas entre agosto de 2019 y agosto de 2020",
+       caption  = "Fuente: MoMo, Centro Nacional de Epidemiología",
+       x        = "Fecha",
+       y        = "Defunciones"
+  )
+```
+
+Solo nos faltaría una leyenda para el color, y así diferenciar que las líneas negras son las defunciones observadas y la azul las esperadas. ¿Por qué ggplot no la genera automáticamente, como en otros gráficos que hemos hecho? Por ejemplo, en este:
+
+```{r}
+# Lectura de los datos del CSV
+usa_president <- read.csv("dat/usa_president.csv")
+
+# Filtro por los partidos de mi interés y agrupo por partido y año
+usa_president_by_year <- usa_president %>%
+  filter(party %in% c("democrat", "republican", "libertarian", "green"),
+         writein == FALSE) %>%
+  group_by(year, party) %>%
+  summarise(candidatevotes = sum(candidatevotes))
+
+# Definición de mi paleta personalizada de colores por partido
+parties_palette <- c("democrat" = "blue", "republican" = "red", "libertarian" = "gold", "green" = "darkgreen")
+
+# Gráfico de evolución en número de votos por partido y año
+ggplot(usa_president_by_year, aes(x = year, y = candidatevotes, color = party)) +
+  geom_line() +
+  scale_y_log10(labels = scales::comma) +
+  scale_color_manual(values = parties_palette) +
+  labs(
+    x     = "Año",
+    y     = "Votos",
+    color = "Partido"
+  )
+```
+
+La diferencia es que, en el gráfico de votos, los colores son parte del mapeo de estéticos a columnas mediante `aes(...)` mientras que en el gráfico de defunciones, son geometrías (`geom_line`) diferentes. En el primer caso, ggplot añade automáticamente la leyenda pero, en el segundo, no lo hará a no ser que lo especifiquemos. Podemos hacerlo creando una paleta manual que usemos en la escala del color e incluyéndola dentro del mapeo de `aes(...)`. De la siguiente forma:
+
+```{r}
+# Paleta
+mortality_palette <- c("Observadas" = "black", "Esperadas" = "blue")
+
+# Guardo el gráfico en la variable p para no repetir este código continuamente
+p <- ggplot(defunciones, aes(x = fecha_defuncion)) +
+  geom_ribbon(aes(ymin = defunciones_esperadas_q01, ymax = defunciones_esperadas_q99),
+              fill = "blue", alpha = 0.3) +
+  geom_line(aes(y = defunciones_observadas, color = "Observadas")) +
+  geom_line(aes(y = defunciones_esperadas, color = "Esperadas")) +
+  scale_x_date(date_breaks = "1 month", date_labels = "%b-%y") +
+  scale_color_manual(values = mortality_palette) +
+  labs(title    = "Mortalidad en España",
+       subtitle = "Defunciones observadas y esperadas entre agosto de 2019 y agosto de 2020",
+       caption  = "Fuente: MoMo, Centro Nacional de Epidemiología",
+       x        = "Fecha",
+       y        = "Defunciones",
+       color    = "Defunciones"
+  )
+
+p
+```
+
+Hay otros aspectos estéticos que podemos personalizar: el tipo de fuente que se usa en las diferentes partes del gráfico, su color y tamaño, el grid que aparece detrás, los márgenes, etc. Todos estos valores toman un valor por defecto, heredado de su tema (_theme_). Si no especificamos uno, el tema por defecto es `theme_gray()`, pero ggplot nos proporciona más opciones: `theme_classic`, `theme_bw`, `theme_minimal`, ...
+
+```{r}
+p + theme_minimal()
+```
+
+> Prueba a escribir en la consola `theme_` y examina con el autocompletado todas las opciones de temas que vienen con ggplot. Prueba varias de ellas sobre el gráfico.
+
+Un tema son opciones por defecto sobre todos los elementos estéticos del gráfico, pero podemos sobrescribirlos. 
+
+```{r}
+p +
+  theme_minimal() +
+  theme(legend.position = "bottom",
+        axis.text.x = element_text(angle = 90, hjust = 1),
+        plot.title = element_text(size = 18, hjust = 0.5))
+```
+
+> De nuevo, es necesario tener la documentación a mano. En [theme](https://ggplot2.tidyverse.org/reference/theme.html) encontramos todos los argumentos que podemos especificar para alterar aspectos del gráfico. Es imposible que nos conozcamos los argumentos de memoria, solo tenemos que tener claro que los podemos localizar rápidamente en la documentación.
+
+## 2. Facets
+
+Hemos visto que podemos añadir variables a visualizar mediante el mapeo de estéticos con `aes(...)`: la posición con x e y, el color, el tipo de línea, el tamaño de un punto, etc.
+
+Otra opción, muy útil cuando tenemos variables categóricas, es dividir el gráfico en varios, cada uno mostrando un subconjunto de los datos. Estos son los _facets_.
+
+Para crear un _facet_ por una variable, podemos utilizar `facet_wrap()`, especificando la fórmula de generación de los _sub-gráficos_. Esta fórmula se puede crear con `~ mi_variable_categorica`.
+
+```{r}
+library(palmerpenguins)
+
+ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point() +
+  facet_wrap(~ species)
+```
+
+> Puedes controlar el número de filas y columnas que se usan mediante los parámetros nrow y ncol de `facet_wrap`. Consulta su ayuda y prueba a cambiarlos sobre el gráfico anterior.
+
+> En la documentación de `facet_wrap`, consulta para qué sirve el parámetro `scales` y prueba a cambiarlo en el gráfico anterior.
+
+Para dividir el gráfico por dos variables en lugar de por una, se suele utilizar `facet_grid` en su lugar, y una formula del tipo `mi_variable_1 ~ mi_variable_2`.
+
+```{r}
+# Quito las filas con el sexo nulo
+tmp <- penguins %>%
+  filter(!is.na(sex))
+
+# Creo el facet por sexo y especie
+ggplot(tmp, aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point() +
+  facet_grid(sex ~ species)
+```
+
+> Normalmente, ponemos la variable que más valores tiene en columnas, y la que menos en filas. Esto es porque los gráficos suelen tener más ancho que alto, y así aprovechamos mejor el espacio.
+
+## 3. Mapas
+
+Representar gráficos con datos geolocalizados es bastante común. Este proceso suele requerir de dos pasos:
+
+1. Pintar el mapa base, es decir, los polígonos que forman las regiones que vamos a representar (p.e. los países del mundo, las comunidades autónomas de España, los barrios de Madrid, ...)
+2. Añadir la información que queremos representar (p.e. la densidad de la población, la incidencia de una determinada enfermedad, ...)
+
+Para seguir la parte sobre mapas, necesitarás tener instalado el paquete sf.
+
+```{r, eval=FALSE}
+# Instálalo si aún no lo tienes
+install.packages("sf")
+```
+
+### Mapas de polígonos
+
+La forma más fácil de pintar un mapa es utilizando `geom_polygon`. Tenemos algunos mapas de ejemplo disponibles con `map_data`:
+
+```{r}
+italy <- map_data("italy")
+head(italy)
+```
+
+```{r}
+ggplot(italy, aes(x = long, y = lat, group = group)) +
+  geom_polygon(fill = "white", color = "black") +
+  coord_quickmap()
+```
+
+> Utilizamos coord_quickmap para que longitud y latitud sigan la misma escala y no aparezca deformado.
+
+Aunque resulta muy cómodo hacerlo de esta forma, no es habitual encontrar los mapas base (los polígonos) en un formato de tabla como este, con información de latitud y longitud. Los formatos más habituales son: geoJSON, shapefiles y bases de datos (especialmente PostgreSQL con PostGIS)
+
+Para leer estos formatos, tenemos `sf::read_sf()`.
+
+```{r}
+library(sf)
+
+# Leo los polígonos de un geojson que contiene las provincias españolas simplificadas
+provincias <- read_sf("dat/spain_provinces.geojson")
+head(provincias)
+```
+
+Tenemos una tabla con una fila por provincia, cada una de ellas con ciertos metadatos (código INE, nombre, ...) y un objeto geometría, con la definición del polígono.
+
+Para representar el mapa base, utilizamos `geom_sf`.
+
+```{r}
+ggplot(provincias) +
+  geom_sf()
+```
+
+Podemos añadir etiquetas a nuestros mapas mediante `geom_sf_label()` o `geom_sf_text()`.
+
+```{r}
+ggplot(provincias) +
+  geom_sf() +
+  geom_sf_label(aes(label = nombre))
+```
+
+Sobre la geometría, podemos mapear otros atributos. Es muy habitual colorear las regiones según el dato que queramos representar. Para ello, primero tenemos que incorporar al mapa esta información.
+
+Para ilustrarlo, vamos a representar la participación en las últimas elecciones españolas por provincia.
+
+```{r}
+# La información de las elecciones la tenemos en:
+# - elecciones_2019_provincias.csv con la información a nivel de provincia (población, censo, votos válidos, ...)
+# - elecciones_2019_votos.csv con el número de votos por provincia y partido
+# Para calcular la participación, solo necesitamos el primer dataset
+elecciones <- read.csv("dat/elecciones_2019_provincias.csv")
+head(elecciones)
+```
+
+```{r}
+# Calculamos el ratio de participación
+participacion <- elecciones %>%
+  mutate(ratio_participacion = round((votos_validos + votos_nulos) / censo_electoral, 3)) %>%
+  select(provincia_cod_ine, ratio_participacion)
+
+head(participacion)
+```
+```{r}
+# Añadimos al mapa esta información
+tmp <- provincias %>%
+  inner_join(participacion, by = c("codigo" = "provincia_cod_ine"))
+
+# Representamos la participación coloreando cada provincia
+# Invertimos la escala con trans = "reverse" para que las intensidades
+# mayores correspondan a niveles más altos de participación
+ggplot(tmp) +
+  geom_sf(aes(fill = ratio_participacion)) +
+  scale_fill_continuous(trans = "reverse")
+```
+
+## 4. Exportación
+
+Tenemos varias formas de guardar los gráficos que vamos generando.
+
+`ggsave()` guarda el último gráfico generado.
+
+```{r eval=FALSE}
+# ggsave guarda el último gráfico generado
+ggsave("mi_grafico.png")
+```
+
+Si estamos en una sesión interactiva con RStudio, podemos pinchar en _Export_ en la ventana de _Plots_.
+
+![](resources/03_ggplot_avanzado/export_from_rstudio.png)
+
+Y ahí podremos elegir varias opciones de exportación, como la ruta del fichero o el tamaño de la imagen.
+
+Aunque podemos utilizar estas dos opciones para guardar los gráficos en disco, lo normal es que formen parte de un documento Rmarkdown y que lo exportemos junto a texto formateado a PDF, HTML u otros formatos. Profundizaremos sobre este tema en el capítulo dedicado a Rmarkdown.
+
+## Profundiza
+
+Para saber más sobre los conceptos que hemos visto, puedes consultar alguna de estas referencias:
+
+* [Chuleta de ggplot](https://github.com/rstudio/cheatsheets/raw/master/data-visualization-2.1.pdf): sintetiza las funciones más habituales para ggplot. Muy útil para tener a mano a la hora de utilizar la librería.
+* [Visualización de datos con ggplot](https://r4ds.had.co.nz/data-visualisation.html) disponible en el libro online de R for Data Science.
+* [Exploratory data analysis](https://r4ds.had.co.nz/exploratory-data-analysis.html) también disponible en el libro online de R for Data Science.
+* [R Graphics Cookbook de Winston Chang](https://www.amazon.com/dp/1491978600/) con recetas para pintar los gráficos más habituales.
+* [ggplot2: Elegant Graphics por Data Analyisis](https://ggplot2-book.org/) profundiza sobre el uso de ggplot para realizar gráficos más avanzados y personalizados. De especial interés en este tema es su [sección dedicada a mapas](https://ggplot2-book.org/maps.html).
+
+
+## Conclusiones
+
+Nos podemos quedar con las siguientes ideas como resumen de este tema:
+
+* Es importante cuidar los textos (título, descripción, pie, nombres de los ejes, ...) cuando nuestros gráficos van dirigidos a un público general, o van a ser incluidos en un informe.
+* Los textos se pueden especificar con `labs()`.
+* Los temas de `ggplot` son plantillas con valores por defecto como tipo y tamaño de fuente, estilo de grid de fondo, ... pero estos valores los podemos sobrescribir.
+* Los _facets_ sirven para separar en gráficos diferentes las observaciones por una o varias variables categóricas.
+* Para representar _facets_ sobre una variable, utilizamos `facet_wrap`. Si es sobre dos variables, utilizamos `facet_grid`.
+* Para pintar gráficas con mapas, necesitamos dos cosas: el mapa base (los polígonos) y los datos a representar.
+* Para leer un mapa base en un formato habitual (geojson, shapefiles, ...) podemos utilizar `sf::read_sf`.
+* Para pintar los polígonos de un mapa, podemos utilizar `geom_sf`. Lo más habitual es mapear el color de relleno _fill_ a la propiedad que queramos representar.
+
+## Actividades
+
+### Actividad 1
+
+Sobre el dataset `diamonds`, pinta:
+
+* El histograma del precio según los _facets_ de la calidad del corte (`cut`)
+* Un gráfico de barras por claridad (`clarity`) según los _facets_ de calidad del corte (`cut`) y color (`color`).
+
+### Actividad 2
+
+Utilizando los datos de elecciones (elecciones_2019_provincias.csv y elecciones_2019_votos.csv) y el mapa base con las provincias (spain_provinces.geojson), crea los siguientes gráficos:
+
+1. Un mapa coloreado según la población de cada provincia (mayor intensidad = mayor población).
+2. Un mapa con el color del partido más votado en cada provincia (PP en azul, PSOE en rojo, ...).
+3. Un _facet_ de mapas, con 4, marcando el porcentaje de votos a los 4 partidos políticos (PP, PSOE, VOX, Podemos). Por ejemplo, en el facet del PSOE, se verán en un color más intenso las provincias con mayor % de votos a PSOE, y menos aquellas con menor %. Y así con cada uno de los partidos.
+
+### Actividad 3
+
+Repasa estos gráficos que acabas de generar y añade títulos, nombres de eje, y personaliza el tema utilizado.

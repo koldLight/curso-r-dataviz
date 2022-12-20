@@ -1,0 +1,134 @@
+---
+title: 'Soluciones capítulo 3'
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+---
+
+```{r, message=FALSE}
+library(dplyr)
+library(ggplot2)
+library(sf)
+```
+
+
+### Actividad 1
+
+Sobre el dataset `diamonds`, pinta:
+
+* El histograma del precio según los _facets_ de la calidad del corte (`cut`)
+* Un gráfico de barras por claridad (`clarity`) según los _facets_ de calidad del corte (`cut`) y color (`color`).
+
+```{r}
+# histograma del precio según la calidad del corte
+ggplot(diamonds, aes(x = price)) +
+  geom_histogram(bins = 30) +
+  facet_wrap(~ cut, scales = "free_y") +
+  theme_minimal() +
+  labs(
+    title = "Relación entre el precio y la calidad",
+    y = "# diamantes",
+    x = "precio"
+  )
+```
+
+```{r}
+# gráfico de barras por claridad según la calidad del corte y color
+ggplot(diamonds, aes(x = clarity)) +
+  geom_bar() +
+  facet_grid(cut ~ color, scales = "free_y") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1)) +
+  labs(
+    y = "# diamantes",
+    x = "Claridad",
+    title = "Diamantes por color, calidad y claridad"
+  )
+```
+
+### Actividad 2
+
+Utilizando los datos de elecciones (elecciones_2019_provincias.csv y elecciones_2019_votos.csv) y el mapa base con las provincias (spain_provinces.geojson), crea los siguientes gráficos:
+
+1. Un mapa coloreado según la población de cada provincia (mayor intensidad = mayor población).
+2. Un mapa con el color del partido más votado en cada provincia (PP en azul, PSOE en rojo, ...).
+3. Un _facet_ de mapas, con 4, marcando el porcentaje de votos a los 4 partidos políticos (PP, PSOE, VOX, Podemos). Por ejemplo, en el facet del PSOE, se verán en un color más intenso las provincias con mayor % de votos a PSOE, y menos aquellas con menor %. Y así con cada uno de los partidos.
+
+```{r}
+# mapa coloreado según la población de cada provincia
+provincias <- read_sf("dat/spain_provinces.geojson")
+elecciones_provincias <- read.csv("dat/elecciones_2019_provincias.csv")
+
+tmp <- provincias %>%
+  inner_join(elecciones_provincias, by = c("codigo" = "provincia_cod_ine"))
+
+ggplot(tmp) +
+  geom_sf(aes(fill = poblacion)) +
+  scale_fill_continuous(trans = "reverse") +
+  theme_void() +
+  labs(
+    title = "Población por provincias",
+    fill  = "Población"
+  )
+```
+
+```{r}
+# mapa con el color del partido más votado en cada provincia
+elecciones_votos <- read.csv("dat/elecciones_2019_votos.csv")
+
+mas_votado <- elecciones_votos %>%
+  group_by(provincia_cod_ine) %>%
+  arrange(desc(votos)) %>%
+  summarise(partido = first(partido))
+
+tmp <- provincias %>%
+  inner_join(mas_votado, by = c("codigo" = "provincia_cod_ine"))
+
+paleta_partidos <- c(
+  "erc"          = "#f7a003",
+  "navarra_suma" = "#444444",
+  "pnv"          = "#278347",
+  "pp"           = "#3caee1",
+  "psoe"         = "#bb0201",
+  "teruelexiste" = "#eeeeee",
+  "vox"          = "#83b431"
+)
+
+ggplot(tmp) +
+  geom_sf(aes(fill = partido)) +
+  scale_fill_manual(values = paleta_partidos) +
+  theme_void() +
+  labs(
+    title = "Partido más votado por provincia",
+    fill  = "Partido"
+  )
+```
+
+```{r}
+# Un _facet_ de mapas, con 4, marcando el porcentaje de votos a los 4 partidos políticos
+# (PP, PSOE, VOX, Podemos)
+
+votos <- elecciones_votos %>%
+  filter(partido %in% c("pp", "psoe", "podemos", "vox")) %>%
+  inner_join(elecciones_provincias) %>%
+  mutate(ratio_votos = votos / votos_validos)
+
+tmp <- provincias %>%
+  inner_join(votos, by = c("codigo" = "provincia_cod_ine"))
+
+ggplot(tmp) +
+  geom_sf(aes(fill = ratio_votos)) +
+  scale_fill_distiller(palette = "Blues", trans = "reverse") +
+  facet_wrap(~ partido) +
+  theme_void()
+```
+
+### Actividad 3
+
+Repasa estos gráficos que acabas de generar y añade títulos, nombres de eje, y personaliza el tema utilizado.
+
+
+```{r}
+# Hecho sobre los propios gráficos
+```

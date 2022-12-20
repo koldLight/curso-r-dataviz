@@ -1,0 +1,351 @@
+---
+title: '5 - Gráficos interactivos con plotly: nivel básico'
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+---
+
+## ¿Qué vamos a hacer?
+
+En capítulos previos hemos visto herramientas para generar tanto visualizaciones estáticas (gráficos con ggplot) como dinámicas (mapas con leaflet).
+
+En este y el siguiente capítulo veremos una alternativa interactiva a los gráficos de ggplot: plotly. Al igual que leaflet, plotly es una librería de gráficos basada en javascript, pero disponible a través de su paquete en R para poder crearlos directamente desde este lenguaje.
+
+Antes de empezar, nos tendremos que asegurar de tener las librerías de `plotly` y `htmlwidgets` instaladas.
+
+```{r, eval=FALSE}
+# Ejecuta las siguiente líneas en el caso de que no los tengas instalados
+install.packages("plotly")
+install.packages("htmlwidgets")
+```
+
+## Gráficos básicos
+
+Al pintar un gráfico con plotly, seguiremos la siguiente estructura:
+
+* Con la función `plot_ly` pintamos el gráfico en sí, pasando los datos como argumento y definiendo:
+
+    * El tipo (y, opcionalmente, el subtipo): de puntos, líneas, barras, ... Se establecen usando los parámetros `type` y `mode`.
+    * Los mapeos de valores a columnas del dataset, usando `x`, `y`, `color`, `size`, ...
+    * Geometrías adicionales utilizando `add_xxxx`, como `add_markers`, `add_lines`, `add_ribbons`, ...
+    
+* Con la función `layout` personalizaremos elementos como el título, los ejes o la leyenda.
+
+### Gráficos de puntos
+
+Podemos pintar un gráfico de puntos usando `type='scatter'` y `mode='markers'`. El mapeo de propiedades a columnas se hace utilizando `~mi_columna`.
+
+```{r}
+library(dplyr)
+library(plotly)
+library(palmerpenguins)
+
+plot_ly(data = penguins, type = "scatter", mode = "markers",
+        x = ~flipper_length_mm, y = ~body_mass_g)
+```
+
+> Fíjate en la interactividad. Pasa el ratón por encima de los puntos, prueba a seleccionar un subconjunto de los puntos y utiliza los controles de arriba a la izquierda.
+
+Podemos personalizarlo. La lista completa de opciones está disponible [aquí](https://plotly.com/r/reference). Navega hasta ella y prueba a buscar todas las posibles opciones del parámetro `marker` dentro de un _scatterplot_ (gráfico de puntos).
+
+Vamos a mapear los colores según la especie del pingüino y a personalizar un poco el estilo de los puntos (_markers_).
+
+```{r}
+plot_ly(data = penguins, type = "scatter", mode = "markers",
+        x = ~flipper_length_mm, y = ~body_mass_g, color = ~species,
+        marker = list(
+          size = 10,
+          line = list(width = 2),
+          opacity = 0.6
+        )
+)
+```
+
+### Gráficos de líneas
+
+El gráfico de líneas lo pintamos utilizando `type='scatter'` y `mode='lines'`.
+
+Vamos a pintar un ejemplo utilizando los datos históricos de paro de EEUU.
+
+```{r}
+# Calculo la tasa de desempleo
+paro <- economics %>%
+  mutate(unemploy_ratio = unemploy / pop)
+
+# Pinto mi gráfico de líneas
+plot_ly(paro, x = ~date, y = ~unemploy_ratio, type = "scatter", mode = "lines")
+```
+
+Podemos añadir diferentes líneas utilizando `add_lines`.
+
+```{r}
+plot_ly(paro, type = "scatter", mode = "lines") %>%
+  add_lines(x = ~date, name = "Población", y = ~pop * 1000) %>%
+  add_lines(x = ~date, name = "Paro",      y = ~unemploy * 1000)
+```
+
+> Para pasar el gráfico a las siguientes funciones (de plot_ly a add_lines), utilizamos `%>%`, igual que en `dplyr` y en `leaflet`. En realidad, este operador pertenece a la librería `magrittr` y lo que hace es pasar el argumento de la izquierda del operador como primer argumento de la función de la derecha.
+
+Si nuestros datos tienen nulos, tenemos dos alternativas para pintar las líneas:
+
+* Dejar el hueco, rompiendo visualmente la línea.
+* Conectar con una línea los puntos con información más cercanos, haciendo una línea más larga.
+
+Para ver la diferencia, vamos a insertar nulos en la serie del paro, en las fechas desde el 1 de enero de 2002 hasta el 1 de enero del 2005.
+
+```{r}
+# Insertamos nulos
+tmp <- paro %>%
+  mutate(unemploy_ratio = ifelse(date >= as.Date("2002-01-01") & date <= as.Date("2005-01-01"),
+                                 NA, unemploy_ratio))
+
+# Pintamos con huecos, es la opción por defecto
+# resulta lo mismo que especificar connectgaps = FALSE
+plot_ly(tmp, x = ~date, y = ~unemploy_ratio, type = "scatter", mode = "lines")
+```
+
+```{r}
+# Pintamos con huecos, es la opción por defecto
+# resulta lo mismo que especificar connectgaps = FALSE
+plot_ly(tmp, x = ~date, y = ~unemploy_ratio, type = "scatter", mode = "lines", connectgaps = TRUE)
+```
+
+También podemos pintar bandas alrededor de líneas, un recurso muy utilizado cuando existen intervalos de confianza. Rescatemos el ejemplo con los datos de defunciones en España.
+
+Conseguimos pintar una banda pintando primero la línea superior (donde acaba) y luego la línea inferor (donde empieza), marcando esta última como `fill = "tonexty"`.
+
+```{r}
+# Lectura de los datos
+defunciones <- read.csv("dat/defunciones_espana.csv")
+
+# Conversión de la fecha de tipo character a Date
+defunciones <- defunciones %>%
+  mutate(fecha_defuncion = as.Date(fecha_defuncion))
+
+# Pintamos la mortalidad observada y la estimada junto con su intervalo de confianza
+plot_ly(defunciones, type = "scatter", mode = "lines") %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_observadas, name = "Observadas",
+            line = list(color = "black")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas, name = "Esperadas",
+            line = list(color = "rgb(22, 96, 167)")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas_q99, name = "Esperadas lim. sup.",
+            line = list(color = "gray", width = 0.5, dash = "dash")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas_q01, name = "Esperadas lim. inf.",
+            fill = "tonexty", fillcolor="rgba(22, 96, 167, 0.3)",
+            line = list(color = "gray", width = 0.5, dash = "dash"))
+```
+
+> Fíjate en cómo definimos los colores: con rgb(r, g, b, a). Es una forma de definir un color en base a sus tres componentes (r = red, g = green, b = blue, a = alpha). El alpha es el grado de opacidad. También lo podríamos definir mediante un nombre (como blue) o su código hexadecimal (como #0000FF).
+
+### Gráficos de barras
+
+Para representar un gráfico de barras, necesitamos especificar `x` e `y`.
+
+Es habitual utilizarlos para hacer un conteo sobre una variable categórica.
+
+```{r}
+penguins_count <- penguins %>%
+  group_by(species) %>%
+  summarise(count = n())
+
+plot_ly(penguins_count, x = ~species, y = ~count, type = "bar")
+```
+
+También disponemos de los tipos de gráficos de barras habituales: agrupados y apilados.
+
+```{r}
+penguins_count_2 <- penguins %>%
+  group_by(species, sex) %>%
+  summarise(count = n())
+
+plot_ly(penguins_count_2, x = ~species, y = ~count, color = ~sex, type = "bar")
+```
+
+
+```{r}
+plot_ly(penguins_count_2, x = ~species, y = ~count, color = ~sex, type = "bar") %>%
+  layout(barmode = "stack")
+```
+
+> Es la primera vez que utilizamos la función `layout`. La usaremos en plotly para ajustar detalles del gráfico como los ejes, títulos, leyendas y otras propiedades.
+
+## Gráficos estadísticos
+
+### Histogramas
+
+En plotly también podemos utilizar gráficos que realizan de forma implícita transformaciones estadísticas. Uno de los más habituales es el histograma, que nos muestra la distribución de una determinada variable.
+
+```{r}
+plot_ly(penguins, x = ~body_mass_g, type = "histogram")
+```
+
+También podemos sobrescribir la función de _binning_, es decir, la transformación estádistica. Es habitual utilizarla para realizar un histograma sobre una variable categórica contando sus observaciones, que produce un resultado equivalente a los ejemplos previos que hemos visto con gráficos de barras.
+
+```{r}
+plot_ly(penguins, x = ~species, histfunc = "sum", type = "histogram")
+```
+
+> La diferencia entre el gráfico de barras anterior y este histograma es que, en el de barras, hicimos nosotros la transformación estadística (agrupar y contar) con dplyr y pasamos los resultados ya preparados; en este histograma, le pasamos todos los datos, y es plot_ly el encargado de hacer la transformación. En este caso el resultado es similar, pero en otros, el caso del histograma puede derivar en un peor rendimiento (proceso más lento).
+
+Otro caso de uso habitual es el de pintar varios histogramas superpuestos, para comparar la distribución en base a una segunda variable. Para hacerlo, utilizamos el `barmode="overlay"` dentro de layout.
+
+```{r}
+plot_ly(penguins, x =~body_mass_g, color =~sex, type = "histogram", alpha = 0.6) %>%
+  layout(barmode = "overlay")
+```
+
+### Boxplots
+
+Ya vimos que los boxplots son habituales al hacer un análisis exploratorio sobre nuestro dataset o para representar ante un público con ciertos conocimientos estadísticos. En plotly los podemos pintar utilizando el `type="box"`.
+
+```{r}
+plot_ly(penguins, x = ~species, y = ~body_mass_g, type = "box")
+```
+
+También tenemos en plotly una alternativa gráfica a los boxplots: los gráficos de violín. También muestran distribuciones, pero suelen ser un poco más amigables para un público con menos conocimientos de estadística.
+
+```{r}
+plot_ly(penguins, x = ~species, y = ~body_mass_g, type = "violin")
+```
+
+## Personalización
+
+Podemos personalizar la mayor parte de los aspecto estéticos de nuestro gráfico en la función `layout`.
+
+### Título y ejes
+
+Los siguientes argumentos de `layout` nos sirven para personalizar varios textos:
+
+* `title`: el título principal del gráfico
+* `xaxis`: las propiedades del eje x
+* `yaxis`: las propiedades del eje x
+
+Vamos a personalizar estos textos sobre el gráfico que teníamos mostrando las defunciones en España.
+
+```{r}
+p <- plot_ly(defunciones, type = "scatter", mode = "lines") %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_observadas, name = "Observadas",
+            line = list(color = "black")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas, name = "Esperadas",
+            line = list(color = "rgb(22, 96, 167)")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas_q99, name = "Esperadas lim. sup.",
+            line = list(color = "gray", width = 0.5, dash = "dash")) %>%
+  add_trace(x = ~fecha_defuncion, y = ~defunciones_esperadas_q01, name = "Esperadas lim. inf.",
+            fill = "tonexty", fillcolor="rgba(22, 96, 167, 0.3)",
+            line = list(color = "gray", width = 0.5, dash = "dash")) %>%
+  layout(title = "Mortalidad observada y esperada en España",
+         xaxis = list(title = "Fecha"),
+         yaxis = list(title = "Defunciones"))
+
+p
+```
+
+### Tooltips
+
+En los gráficos que hemos estado representando, podemos ver que el estilo del _tooltip_ (el cuadro con información al pasar el ratón por encima en algún punto) por defecto es `(valor en eje x, valor en eje y)`.
+
+Podemos personalizar este valor de diferentes formas.
+
+Un caso de uso habitual cuando tenemos varias líneas es unificar el _tooltip_, de forma que la información de todas las líneas aparezca junta en el cuadro de información, con `layout(hovermode = "<x|y> unified")`
+
+```{r}
+p %>%
+  layout(hovermode = "x unified")
+```
+
+Para personalizar el texto y formato del _tooltip_ podemos utilizar los [_hovertemplates_](https://plotly.com/r/reference/#pie-hovertemplate). Se trata de plantillas en las que podemos incluir:
+
+* Variables con `%{variable}`
+* Números con [formato d3](https://github.com/d3/d3-3.x-api-reference/blob/master/Formatting.md#d3_format), en la forma `variable|formato`
+* Fechas con [formato d3](https://github.com/d3/d3-3.x-api-reference/blob/master/Time-Formatting.md#format), en la forma `variable:formato`
+* Etiquetas html como `<br/>` para saltar de línea, `<b>...</b>` para resaltar en negrita, ...
+
+_Nota_: d3 es una librería de visualización de datos de javascript de bajo nivel, en la que se basan muchas otras. Puedes consultar los links con la documentación necesaria de los formatos citados.
+
+Aquí tenemos un ejemplo con todos los elementos descritos: etiquetas html, y variables con formateo especial de números y fechas.
+
+```{r}
+plot_ly(paro, x = ~date, y = ~unemploy_ratio, type = "scatter", mode = "lines", name = "Paro",
+        hovertemplate = "<b>Fecha:</b> %{x|%B %Y}<br>Paro: %{y:.2%}") %>%
+  layout(title = "Paro en EEUU",
+         xaxis = list(title = "Fecha"),
+         yaxis = list(title = "Paro"))
+```
+
+## Transformación de gráficos de ggplot a plotly
+
+Plotly trae una función para transformar gráficos de `ggplot2` a `plotly`. Esta funcionalidad resulta muy útil si ya tenemos una serie de gráficos hechos con `ggplot2` y queremos hacerlos interactivos de una forma rápida.
+
+Si por el contrario, nos encontramos de cero con un proyecto de visualización de datos interactivo, es mejor empezarlo con las funciones de `plot_ly` puras: la transformación vía ggplot2 tiene sus limitaciones.
+
+La función que transforma un gráfico de de `ggplot2` a `plotly` es `ggplotly`. Veamos un ejemplo:
+
+```{r}
+library(ggplot2)
+
+# Generamos un gráfico con ggplot
+p <- ggplot(data = penguins, mapping = aes(x = flipper_length_mm, y = body_mass_g)) + 
+  geom_point()
+
+# Con la función ggplotly, lo volvemos interactivo: es decir, lo transformamos
+# en un gráfico de plotly
+ggplotly(p)
+```
+
+## Profundiza
+
+Para saber más sobre los conceptos que hemos visto, puedes consultar alguna de estas referencias:
+
+* [Chuleta de plotly](https://images.plot.ly/plotly-documentation/images/r_cheat_sheet.pdf): sintetiza las funciones más habituales para plotly. Muy útil para tener a mano a la hora de utilizar la librería.
+* [Referencia completa de atributos de plotly](https://plotly.com/r/reference): documenta todos los posibles atributos que se pueden establecer por cada tipo de gráfico.
+* [Referencia de gráficos básicos en plotly](https://plotly.com/r/basic-charts/): consúltalo para ver más ejemplos de gráficos básicos
+* [Referencia de gráficos estadísticos en plotly](https://plotly.com/r/statistical-charts/): documentación completa de los gráficos estadísticos en plotly
+
+## Conclusiones
+
+Nos podemos quedar con las siguientes ideas como resumen de este tema:
+
+* Cuando nos encontramos ante un proyecto de visualización de datos, podemos decidir si hacerlo con gráficos estáticos o dinámicos. El primer caso es más rápido y sencillo; el segundo, proporciona visualizaciones más completas y enriquecidas.
+* En R, podemos utilizar ggplot2 para gráficos estáticos y plotly para gráficos dinámicos.
+* Si tenemos una visualización de datos ya hecha con ggplot2 y queremos pasarla rápidamente a interactiva, podemos utilizar `ggplotly()`. Si, por el contrario, nos encontramos ante un proyecto a empezar desde cero, es preferible utilizar las funciones puras de `plot_ly`.
+* Los mapeos de propiedades con columnas se hacen utilizando `~mi_columna`.
+* Las personalizaciones más estéticas como cambiar textos, fuentes, formatos, etc. se hacen con la función `layout()`.
+
+## Actividades
+
+Vamos a pintar con plotly algunos gráficos que ya habíamos representado con ggplot. Para hacerlo, no utilices `ggplotly`: utiliza las funciones puras de `plotly`.
+
+### Actividad 1
+
+Utilizando el dataset `diamonds`, representa la relación en un gráfico de puntos del precio frente a los quilates.
+
+### Actividad 2
+
+Con el dataset `penguins`:
+
+1. Pinta la relación entre longitud y profunidad del pico.
+
+2. Añade al gráfico del punto 1 la distinción entre especies mediante el color.
+
+3. Añade al gráfico del punto 1 la distinción entre el peso corporal mediante el color.
+
+### Actividad 3
+
+1. Lee los datos del economista (dat/economist.csv), con indicadores de desarrollo y corrupción por países:
+
+* HDI: Human Development Index (1: más desarrollado)
+* CPI: Corruption Perception Index (10: menos corrupto)
+
+2. Crea un gráfico que:
+
+* Cada país sea un punto
+* El eje x indique CPI, el y HDI
+* El color del punto indique la región
+* Su tamaño sea proporcional al ranking HDI
+
+### Actividad 4
+
+1. Lee los datos de los resultados de las elecciones presidenciales de los Estados Unidos (dat/usa_president.csv).
+
+2. Pinta en un gráfico de líneas la evolución del número de votos a lo largo de los años del partido republicado frente al demócrata.

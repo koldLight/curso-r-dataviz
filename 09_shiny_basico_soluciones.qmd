@@ -1,0 +1,160 @@
+---
+title: "Soluciones capítulo 9"
+author: "Luz Frias"
+execute:
+  message: false
+  warning: false
+output:
+  html_document:
+    highlight: null
+---
+
+Para probar correctamente las aplicaciones shiny, tendrás que copiar y pegar el código a un intérprete de R.
+
+
+```{r, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(shiny)
+library(palmerpenguins)
+library(plotly)
+library(leaflet)
+library(DT)
+library(sf)
+```
+
+### Actividad 1
+
+Crea una aplicación, utilizando el dataset de los pingüinos, que tenga:
+
+* Como inputs, unos _radio buttons_ para elegir el sexo.
+* Como outputs: 
+
+    * Un gráfico de puntos de _plotly_ mostrando en el eje x el peso, y en el eje y la longitud de la aleta, y con un color diferente por especie, solo para el sexo escogido.
+    * Una _datatable_ paginada con el detalle de especie, sexo, peso y longitud de la aleta, para el sexo escogido.
+
+```{r, eval=FALSE}
+# La interfaz gráfica
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      radioButtons(
+        inputId = "sex",
+        label   = "Sexo",
+        choices = c("female", "male")
+      )
+    ),
+    
+    mainPanel(
+      plotlyOutput(outputId = "chart"),
+      dataTableOutput(outputId = "table")
+    )
+  )
+)
+
+# El servidor
+server <- function(input, output) {
+  
+  output$chart <- renderPlotly({
+    tmp <- filter(penguins, !is.na(sex), sex == input$sex)
+    plot_ly(tmp, type = "scatter", mode = "markers",
+            x = ~body_mass_g, y = ~flipper_length_mm)
+  })
+  
+  output$table <- renderDataTable({
+    penguins %>%
+      filter(!is.na(sex), sex == input$sex) %>%
+      select(species, sex, body_mass_g, flipper_length_mm)
+  })
+}
+
+# Generamos la aplicación
+shinyApp(ui = ui, server = server)
+```
+
+### Actividad 2
+
+Crea una aplicación de shiny para visualizar las líneas y paradas del metro de Madrid sobre un mapa interactivo.
+
+Tienes disponible los datos en `dat/lineas_metro.geojson` y `dat/paradas_metro_madrid.geojson`.
+
+La aplicación tendrá:
+
+* Como inputs, el listado de líneas disponibles.
+* Como output, un mapa de `leaflet` mostrando la línea y sus paradas sobre Madrid.
+
+```{r, eval=FALSE}
+lineas_metro  <- read_sf("dat/lineas_metro.geojson")
+lineas_select <- lineas_metro$Linea
+names(lineas_select) <- lineas_metro$Texto
+
+# La interfaz gráfica
+ui <- fluidPage(
+  sidebarLayout(
+    sidebarPanel(
+      selectInput(
+        inputId = "linea",
+        label   = "Línea",
+        choices = lineas_select
+      )
+    ),
+    
+    mainPanel(
+      leafletOutput(outputId = "map")
+    )
+  )
+)
+
+# El servidor
+server <- function(input, output) {
+  
+  paradas_metro <- read_sf("dat/paradas_metro_madrid.geojson")
+  lineas_metro  <- read_sf("dat/lineas_metro.geojson")
+  
+  colores_lineas <- c(
+    "L1"    = "#38a3dc",
+    "L2"    = "#f40104",
+    "L3"    = "#fbe115",
+    "L4"    = "#944247",
+    "L5"    = "#96bf0e",
+    "L6"    = "#9fa4a6",
+    "L7"    = "#f7a64b",
+    "L8"    = "#f500ff",
+    "L9"    = "#a3228d",
+    "L10"   = "#174594",
+    "L11"   = "#185b00",
+    "L12"   = "#a49a00",
+    "Ramal" = "#090080"
+  )
+  
+  paleta_lineas <- colorFactor(
+    palette = unname(colores_lineas),
+    levels  = names(colores_lineas)
+  )
+  
+  output$map <- renderLeaflet({
+    # Filtros
+    tmp_lineas <- lineas_metro %>%
+      filter(Linea == input$linea)
+    tmp_paradas <- paradas_metro %>%
+      filter(line == input$linea)
+    
+    leaflet(tmp_lineas) %>%
+      addProviderTiles("CartoDB.Positron") %>%
+      setView(lng = -3.69, lat = 40.43, zoom = 12) %>%
+      addPolylines(data = tmp_lineas, color = ~paleta_lineas(Linea), opacity = 0.8) %>%
+      addCircleMarkers(data = tmp_paradas, stroke = FALSE, radius = 5, fillOpacity = 0.5) %>%
+      addLegend(
+        position = "bottomright",
+        pal      = paleta_lineas,
+        values   = ~Linea,
+        title    = "Línea"
+      )
+  })
+  
+}
+
+# Generamos la aplicación
+shinyApp(ui = ui, server = server)
+```
+
