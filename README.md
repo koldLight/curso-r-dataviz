@@ -1,5 +1,7 @@
 # Curso de visualización de datos en R
 
+El curso está disponible en [https://rdataviz.luzfrias.com/](https://rdataviz.luzfrias.com/)
+
 ## Presentación del curso
 
 La visualización es una parte esencial de cualquier proyecto de datos. Nos ayuda a comprender la estructura de nuestro dataset y a detectar patrones y outliers.
